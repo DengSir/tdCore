@@ -1,0 +1,21 @@
+﻿
+local L = tdCore:NewLocale('tdCore', 'zhCN')
+
+if not L then return end
+
+L['Abort']      = '退出'
+L['Discard']    = '丢弃'
+L['Open']       = '打开'
+L['Retry']      = '重试'
+
+L['Taiduo\'s Addons'] = '太多插件'
+
+L['You change the configuration of some addons, you want to save ?'] = '你修改了一些插件的配置，你要保存吗？'
+L['Are you sure to reset the addon |cffff0000[%s]|r configuration file?'] = '你确定要恢复插件|cffff0000[%s]|r的默认配置？'
+
+L['Addon Name:'] = '插件名称：'
+L['Addon Version:'] = '插件版本：'
+L['Addon Author:'] = '插件作者：'
+L['Author Email:'] = '作者邮箱：'
+L['Author Weibo:'] = '作者微博：'
+L['Author GitHub:'] = '作者GitHub：'
