@@ -135,7 +135,7 @@ function OptionFrame:OnDefault()
                     local db = addon:GetDB()
                     if db then
                         db:ResetProfile()
-                        addon:RunHandle('OnProfileUpdate')
+                        addon:UpdateProfile()
                         addon:GetOption():Update()
                         db:BackupCurrentProfile()
                     end

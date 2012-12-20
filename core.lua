@@ -40,6 +40,22 @@ function tdCore:IterateAddons()
     return self.Addon:IterateAddons()
 end
 
+function tdCore:SetAllowDebug(allow)
+    if IsAddOnLoaded('tdDebug') then
+        self.__debug = allow
+    end
+end
+
+function tdCore:GetAllowDebug()
+    return self.__debug
+end
+
+function tdCore:Debug(addon, ...)
+    if self:GetAllowDebug() then
+        tdCore('tdDebug'):Add(addon, ...)
+    end
+end
+
 function tdCore:ADDON_LOADED(event, name)
     local addon = self:GetAddon(name)
     if addon then

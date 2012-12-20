@@ -42,11 +42,14 @@ function GUI:CreateGUI(data, parent, uiparent)
     end
     
     local obj = Class:New(parent or UIParent)
-    uiparent = uiparent or obj
     
-    if data.name then
-        uiparent.__namedControls = uiparent.__namedControls or {}
-        uiparent.__namedControls[data.name] = obj
+    if uiparent ~= false then
+        uiparent = uiparent or obj
+        
+        if data.name then
+            uiparent.__namedControls = uiparent.__namedControls or {}
+            uiparent.__namedControls[data.name] = obj
+        end
     end
     
     Set.SetChildOrientation(obj, data.orientation)
@@ -62,8 +65,9 @@ function GUI:CreateGUI(data, parent, uiparent)
     -- Control
     Set.SetNote(obj, data.note)
     Set.SetProfile(obj, unpack(data.profile))
-    Set.SetDepend(obj, uiparent:GetControl(data.depend))
-    
+    if uiparent then
+        Set.SetDepend(obj, uiparent:GetControl(data.depend))
+    end
     -- All UIObject
     Set.SetWidth(obj, data.width)
     Set.SetHeight(obj, data.height)

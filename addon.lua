@@ -42,12 +42,19 @@ function Addon:GetVersion()
     return self.__version
 end
 
+function Addon:Debug(...)
+    tdCore:Debug(self, ...)
+end
+
 ------ module
 
 local Embeds = {
     BaseEmbed = {
-        GetAddon = function(obj)
-            return obj.__tdaddon
+        GetAddon = function(self)
+            return self.__tdaddon
+        end,
+        Debug = function(self, ...)
+            self:GetAddon():Debug(self:GetClassName(), ...)
         end,
     },
     
