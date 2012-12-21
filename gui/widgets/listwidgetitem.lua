@@ -144,7 +144,7 @@ function ListWidgetLinkItem:GetInfo(text)
     if linkType == 'item' then
         local itemName, itemLink, itemQuality, _, _, _, _, _, _, itemTexture = GetItemInfo(id)
         if not itemName then
-            self:StartUpdate()
+            self:StartUpdate(0.2)
             return
         end
         

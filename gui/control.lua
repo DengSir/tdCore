@@ -1,4 +1,7 @@
 
+local assert, error, ipairs, pairs, type = assert, error, ipairs, pairs, type
+local tdCore = tdCore
+
 local GUI = tdCore('GUI')
 
 local function copyTable(src)

@@ -1,10 +1,9 @@
 
-local pairs, ipairs, next, type, format = pairs, ipairs, next, type, string.format
+local next, pairs, wipe = next, pairs, wipe
+local format = string.format
+local tdCore = tdCore
 
 local DB = tdCore:NewLibrary('DB', tdCore.DB, 1)
-
-local UnitName = UnitName or function() return 'player' end
-local GetRealmName = GetRealmName or function() return 'realmname' end
 
 local PROFILE_KEY = format('%s - %s', UnitName('player'), GetRealmName())
 

@@ -39,6 +39,7 @@ function ComboBox:New(parent)
         obj:GetHighlightTexture():SetPoint('TOPLEFT', 3, -3)
         obj:GetHighlightTexture():SetPoint('BOTTOMRIGHT', -3, 3)
         
+        obj:GetLabelFontString():SetPoint('BOTTOMLEFT', obj, 'TOPLEFT')
         obj:GetValueFontString():SetPoint('CENTER')
         obj:SetFontString(obj:GetValueFontString())
         

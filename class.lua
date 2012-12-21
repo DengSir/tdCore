@@ -1,7 +1,16 @@
 
-local type, assert, rawget, rawset, format, setmetatable = type, assert, rawget, rawset, string.format, setmetatable
+local assert, select = assert, select
+local rawget, rawset, setmetatable = rawget, rawset, setmetatable
+local format = string.format
+local tdCore = tdCore
 
 local handles = {}
+
+local function Debug(self, ...)
+    if tdCore:GetAllowDebug() then
+        tdCore:Debug('tdCore', self:GetClassName(), ...)
+    end
+end
 
 local function Bind(self, obj)
     if not rawget(self, '__index') then

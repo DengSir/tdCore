@@ -1,5 +1,8 @@
 
-local error, tinsert, ipairs, type, pairs = error, tinsert, ipairs, type, pairs
+local assert, error, pairs, type = assert, error, pairs, type
+local format, strlen = string.format, string.len
+local tinsert = table.insert
+local tdCore = tdCore
 
 local GUI = tdCore('GUI')
 local L = tdCore:GetLocale('tdCore')
@@ -168,7 +171,7 @@ end
 local Addon = tdCore.Addon
 
 function Addon:InitOption(gui, title)
-    assert(type(gui) == 'table')
+    assert(type(gui) == 'table', 'Bad argument #1 to `InitOption\' (string expected)')
     
     local obj = GUI:CreateGUI(gui)
     
@@ -218,6 +221,10 @@ function Addon:ToggleOption()
         OptionFrame:SetAddon(self:GetOption())
         OptionFrame:Show()
     end
+end
+
+function Addon:UpdateOption()
+    self:GetOption():Update()
 end
 
 GUI:RegisterCmd('/td', '/taiduo', '/taiduooption', '/tdoption')

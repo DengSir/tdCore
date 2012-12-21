@@ -416,7 +416,7 @@ function ListWidget:ButtonStartMoving(button)
     button:LockHighlight()
     button:Show()
     
-    self:StartUpdate()
+    self:StartUpdate(0.3)
 end
 
 function ListWidget:ButtonStopMoving(button)

@@ -3,8 +3,6 @@ local lib, version = 'tdCore', 1
 
 if _G[lib] and _G[lib].version >= version then return end
 
-local rawget, setmetatable = rawget, setmetatable
-
 _G[lib] = CreateFrame('Frame')
 
 local tdCore = _G[lib]
@@ -50,9 +48,9 @@ function tdCore:GetAllowDebug()
     return self.__debug
 end
 
-function tdCore:Debug(addon, ...)
+function tdCore:Debug(name, ...)
     if self:GetAllowDebug() then
-        tdCore('tdDebug'):Add(addon, ...)
+        tdCore('tdDebug'):Add(name, ...)
     end
 end
 

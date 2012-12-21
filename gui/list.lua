@@ -1,4 +1,8 @@
 
+local ipairs, type = ipairs, type
+local tinsert, tremove = table.insert, table.remove
+local tdCore = tdCore
+
 local GUI = tdCore('GUI')
 
 local List = GUI:NewModule('List')

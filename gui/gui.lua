@@ -1,4 +1,7 @@
 
+local error, ipairs, pairs, setmetatable, type = error, ipairs, pairs, setmetatable, type
+local tdCore = tdCore
+
 local GUI = tdCore:NewAddon('GUI', {}, 1)
 
 function GUI:GetWidgetType(obj)

@@ -1,4 +1,8 @@
 
+local error, ipairs = error, ipairs
+local tinsert, tremove = table.insert, table.remove
+local tdCore = tdCore
+
 local View = {}
 function View:IterateChildren()
     return ipairs(self.__children)

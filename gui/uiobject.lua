@@ -1,4 +1,7 @@
 
+local getmetatable, select, type, unpack = getmetatable, select, type, unpack
+local tdCore = tdCore
+
 local GUI = tdCore('GUI')
 local UIObject = {}
 

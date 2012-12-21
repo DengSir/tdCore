@@ -1,5 +1,6 @@
 
-local GetLocale = GetLocale or function() return 'zhCN' end
+local assert, type = assert, type
+local GetLocale = GetLocale
 
 local locales = {}
 
