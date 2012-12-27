@@ -6,7 +6,7 @@ local tdCore = tdCore
 
 local GUI = tdCore('GUI')
 local L = tdCore:GetLocale('tdCore')
- 
+
 local addons = {}
 local options = {}
 
