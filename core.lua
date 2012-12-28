@@ -71,7 +71,9 @@ end
 
 function tdCore:PLAYER_LOGOUT()
     for _, addon in self:IterateAddons() do
-        addon:GetDB():RemoveDefault()
+        if addon:GetDB() then
+            addon:GetDB():RemoveDefault()
+        end
     end
 end
 
