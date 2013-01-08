@@ -2,6 +2,7 @@
 local GUI = tdCore('GUI')
 
 local Button = GUI:NewModule('Button', CreateFrame('Button'), 'UIObject')
+Button:SetVerticalArgs(40, 0, 0)
 
 function Button:New(parent)
     local obj = self:Bind(CreateFrame('Button', nil, parent))
@@ -21,6 +22,10 @@ function Button:New(parent)
         obj:GetDisabledTexture():SetTexCoord(0, 0.625, 0, 0.6875)
     end
     return obj
+end
+
+function Button:Update()
+
 end
 
 Button.SetLabelText = Button.SetText

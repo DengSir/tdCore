@@ -2,7 +2,7 @@
 local error, ipairs, pairs, setmetatable, type = error, ipairs, pairs, setmetatable, type
 local tdCore = tdCore
 
-local GUI = tdCore:NewAddon('GUI', {}, 1)
+local GUI = tdCore:NewAddon('GUI', {}, 2)
 
 function GUI:GetWidgetType(obj)
     if type(obj) == 'table' and type(obj.GetWidgetType) == 'function' then
@@ -16,10 +16,9 @@ function GUI:IsWidgetType(obj, widgetType)
     end
 end
 
-local oldunpack = unpack
-local function unpack(t)
+local function safeunpack(t)
     if type(t) == 'table' then
-        return oldunpack(t)
+        return unpack(t)
     end
 end
 
@@ -56,9 +55,9 @@ function GUI:CreateGUI(data, parent, uiparent)
     end
     
     Set.SetChildOrientation(obj, data.orientation)
-    Set.SetHorizontalArgs(obj, unpack(data.horizontalArgs))
-    Set.SetVerticalArgs(obj, unpack(data.verticalArgs))
-    Set.SetPadding(obj, unpack(data.padding))
+    Set.SetHorizontalArgs(obj, safeunpack(data.horizontalArgs))
+    Set.SetVerticalArgs(obj, safeunpack(data.verticalArgs))
+    Set.SetPadding(obj, safeunpack(data.padding))
     obj:Into()
     
     for i, childdata in ipairs(data) do
@@ -67,7 +66,7 @@ function GUI:CreateGUI(data, parent, uiparent)
     
     -- Control
     Set.SetNote(obj, data.note)
-    Set.SetProfile(obj, unpack(data.profile))
+    Set.SetProfile(obj, safeunpack(data.profile))
     if uiparent then
         Set.SetDepend(obj, uiparent:GetControl(data.depend))
     end
@@ -75,8 +74,8 @@ function GUI:CreateGUI(data, parent, uiparent)
     Set.SetWidth(obj, data.width)
     Set.SetHeight(obj, data.height)
     Set.SetLabelText(obj, data.label)
-    Set.SetPoint(obj, unpack(data.point))
-    Set.SetPoints(obj, unpack(data.points))
+    Set.SetPoint(obj, safeunpack(data.point))
+    Set.SetPoints(obj, safeunpack(data.points))
     
     -- MainFrame
     Set.SetAllowEscape(obj, data.allowEscape)

@@ -1,6 +1,6 @@
 ﻿## Interface: 50100
 ## Title: tdCore
 ## Author: ldz5
-## Version: 50100.01
+## Version: 50100.02
 
 load.xml

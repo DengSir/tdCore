@@ -88,6 +88,7 @@ function tdCore:NewClass(name, obj)
     return obj
 end
 
+--[[
 local librarys = {}
 
 function tdCore:NewLibrary(name, obj, version)
@@ -107,3 +108,4 @@ function tdCore:GetLibrary(name)
     
     return librarys[name]
 end
+--]]

@@ -34,10 +34,12 @@ GUI.DialogIcon = {
 
 local function ButtonOnClick(self)
     if type(DialogMenu.func) == 'function' then
-        DialogMenu.func(self:GetText())
+        DialogMenu.func(self:GetText(),
+            (DialogMenu.hasMultiText and DialogMenu.textedit:GetText()) or (DialogMenu.hasText and DialogMenu.lineedit:GetText()))
     end
     DialogMenu:Hide()
 end
+
 function DialogMenu:GetButton(i)
     if not self.buttons[i] then
         local button = GUI('Button'):New(DialogMenu)
@@ -71,7 +73,7 @@ function DialogMenu:UpdateDialog()
     local width = self.buttonCount * BUTTON_WIDTH + MENU_PADDING * 2 + ICON_SIZE
     local height = ceil(label:GetStringWidth() / (width - MENU_PADDING - ICON_SIZE) + 0.5) * label:GetStringHeight()
     
-    self:GetLabelFontString():SetHeight(200)
+--    self:GetLabelFontString():SetHeight(height)
     
     if self.hasMultiText then
         self.textedit:Show()

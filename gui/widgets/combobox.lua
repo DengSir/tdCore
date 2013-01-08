@@ -4,6 +4,7 @@ local GUI = tdCore('GUI')
 local List = GUI('List')
 local ComboBox = GUI:NewModule('ComboBox', CreateFrame('Button'), 'UIObject', 'Control')
 ComboBox:SetVerticalArgs(40, -15, 0, -20)
+ComboBox:RegisterHandle('OnValueChanged')
 
 local function OnClick(self)
     self:GetParent():OnClick()
@@ -82,6 +83,7 @@ end
 function ComboBox:SetValue(value)
     self:SetProfileValue(value)
     self:Update()
+    self:RunHandle('OnValueChanged', value)
 end
 
 function ComboBox:SetItemList(itemList)

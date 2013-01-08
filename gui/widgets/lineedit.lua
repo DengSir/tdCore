@@ -97,5 +97,4 @@ function LineEdit:OnTextChanged()
         end
     end
     self.prevValue = text
-    self:SetText(text)
 end
