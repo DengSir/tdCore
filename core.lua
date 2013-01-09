@@ -1,5 +1,5 @@
 
-local lib, version = 'tdCore', 2
+local lib, version = 'tdCore', 3
 
 if _G[lib] and _G[lib].version >= version then return end
 
