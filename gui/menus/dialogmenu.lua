@@ -5,7 +5,7 @@ local L = tdCore:GetLocale('tdCore')
 
 local ICON_SIZE, BUTTON_WIDTH, BUTTON_HEIGHT, MENU_PADDING = 64, 100, 22, 10
 
-local DialogMenu = GUI:NewMenu('DialogMenu', GUI('Widget'):New(UIParent), 20)
+local DialogMenu = GUI:NewMenu('DialogMenu', GUI('Widget'):New(UIParent), 180)
 
 GUI.DialogButton = {
     Okay    = OKAY,
@@ -72,8 +72,6 @@ function DialogMenu:UpdateDialog()
     
     local width = self.buttonCount * BUTTON_WIDTH + MENU_PADDING * 2 + ICON_SIZE
     local height = ceil(label:GetStringWidth() / (width - MENU_PADDING - ICON_SIZE) + 0.5) * label:GetStringHeight()
-    
---    self:GetLabelFontString():SetHeight(height)
     
     if self.hasMultiText then
         self.textedit:Show()
@@ -145,6 +143,11 @@ do
     DialogMenu.buttons = {}
     
     DialogMenu.lineedit = GUI('LineEdit'):New(DialogMenu)
+    DialogMenu.lineedit:SetAutoFocus(true)
+    DialogMenu.lineedit:Hide()
+    
     DialogMenu.textedit = GUI('TextEdit'):New(DialogMenu)
     DialogMenu.textedit:SetHeight(100)
+    DialogMenu.textedit:SetAutoFocus(true)
+    DialogMenu.textedit:Hide()
 end

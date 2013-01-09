@@ -1,7 +1,10 @@
 
-local assert, pairs, select = assert, pairs, select
+local assert, pairs, select, tonumber, type = assert, pairs, select, tonumber, type
 local strsplit, strupper = string.split, string.upper
 local tdCore = tdCore
+
+local GetAddOnMetadata = GetAddOnMetadata
+local GetAddOnInfo = GetAddOnInfo
 
 local Addon = tdCore:NewLibrary('Addon', tdCore.Addon, 1)
 Addon:RegisterHandle('OnProfileUpdate', 'OnSlashCmd')
