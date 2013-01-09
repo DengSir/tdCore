@@ -311,10 +311,6 @@ function ListWidget:Refresh()
         
     local scrollShown = self.__scrollBar:IsShown()
     
-    for i = 1, self:GetChildrenCount() do
-        self:GetChild(i):Hide()
-    end
-    
     for i = start, self:GetEndIndex() do
         local button = self:GetButton(bIndex)
         button:SetHeight(itemHeight)
@@ -337,6 +333,13 @@ function ListWidget:Refresh()
         maxWidth = max(maxWidth, button:GetLabelFontString():GetStringWidth())
         
         bIndex = bIndex + 1
+    end
+    
+    for i = self:GetEndIndex() + 1, self:GetChildrenCount() do
+        local button = self:GetChild(i)
+        if button then
+            button:Hide()
+        end
     end
     
     if self.__autoSize then
@@ -434,18 +437,13 @@ function ListWidget:ChangeStartIndex()
 end
 
 function ListWidget:OnUpdate(elapsed)
-    self.__updater = (self.__updater or 0) - elapsed
-    if self.__updater < 0 then
-        self.__updater = 0.2
+    self:ChangeStartIndex()
     
-        self:ChangeStartIndex()
-        
-        local index = self:GetMoveToIndex()
-        if self.__movingIndex ~= index then
-            self:GetItemList():ItemMoveTo(self.__movingIndex, index)
-            self.__movingIndex = index
-            self:Refresh()
-        end
+    local index = self:GetMoveToIndex()
+    if self.__movingIndex ~= index then
+        self:GetItemList():ItemMoveTo(self.__movingIndex, index)
+        self.__movingIndex = index
+        self:Refresh()
     end
 end
 
