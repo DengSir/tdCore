@@ -1,11 +1,12 @@
 
 local GUI = tdCore('GUI')
+local L = tdCore:GetLocale('tdCore')
 
 local LIST_SPACING = 5
 
 local List = GUI('List')
 local ListWidget = GUI:NewModule('ListWidget', CreateFrame('Frame'), 'UIObject', 'View', 'Control', 'Update')
-ListWidget:RegisterHandle('OnItemClick')
+ListWidget:RegisterHandle('OnItemClick', 'OnAdd', 'OnDelete', 'OnSelectAll', 'OnSelectNone')
 
 function ListWidget:GetWheelStep()
     return self:GetMaxCount() - 1
@@ -36,10 +37,42 @@ function ListWidget:New(parent)
     obj:SetScript('OnShow', self.Refresh)
     obj:SetScript('OnHide', self.OnHide)
     
+    obj:SetHandle('OnDelete', self.OnDelete)
+    obj:SetHandle('OnSelectAll', self.OnSelectAll)
+    obj:SetHandle('OnSelectNone', self.OnSelectNone)
+    
     return obj
 end
 
 ---- scripts
+
+function ListWidget:OnDelete()
+    GUI:ShowMenu('DialogMenu', nil, nil,
+        {
+            mode = GUI.DialogIcon.Warning,
+            label = L['Are you sure to delete the selected item?'],
+            buttons = {GUI.DialogButton.Okay, GUI.DialogButton.Cancel},
+            func = function(result)
+                if result == GUI.DialogButton.Okay then
+                    for i = self:GetItemCount(), 1, -1 do
+                        if self:GetSelected(i) then
+                            self:GetItemList():RemoveItem(i)
+                        end
+                    end
+                    self:SetProfileValue(self:GetItemList(), true)
+                    self:Refresh()
+                end
+            end,
+        })
+end
+
+function ListWidget:OnSelectAll()
+    self:SelectAll(true)
+end
+
+function ListWidget:OnSelectNone()
+    self:SelectAll(false)
+end
 
 function ListWidget:OnScrollValueChanged(value)
     self:SetStartIndex(value)
@@ -47,7 +80,8 @@ function ListWidget:OnScrollValueChanged(value)
 end
 
 function ListWidget:OnSizeChanged(width, height)
-    self.__maxCount = floor((height - LIST_SPACING * 2) / (self:GetItemHeight() + self:GetItemSpacing()))
+    self.__maxCount = floor((height - LIST_SPACING * 2 - (self.extraButtons and #self.extraButtons > 0 and 34 or 0))
+        / (self:GetItemHeight() + self:GetItemSpacing()))
     self:Refresh()
 end
 
@@ -117,6 +151,27 @@ end
 
 function ListWidget:GetSelectMode()
     return self.__selectMode or 'NONE'
+end
+
+function ListWidget:GetExtraButton(index, type)
+    if not self.extraButtons[index] then
+        self.extraButtons[index] = GUI('ListWidgetButton'):New(self, type)
+    end
+    return self.extraButtons[index]
+end
+
+function ListWidget:SetExtraButton(list)
+    self.extraButtons = self.extraButtons or {}
+    for i, type in ipairs(list) do
+        local button = self:GetExtraButton(i, type)
+        
+        button:ClearAllPoints()
+        if i == 1 then
+            button:SetPoint('BOTTOMLEFT', 10, 10)
+        else
+            button:SetPoint('LEFT', self.extraButtons[i-1], 'RIGHT', 8, 0)
+        end
+    end
 end
 
 function ListWidget:SetAllowOrder(allowOrder)
@@ -256,6 +311,10 @@ function ListWidget:Refresh()
         
     local scrollShown = self.__scrollBar:IsShown()
     
+    for i = 1, self:GetChildrenCount() do
+        self:GetChild(i):Hide()
+    end
+    
     for i = start, self:GetEndIndex() do
         local button = self:GetButton(bIndex)
         button:SetHeight(itemHeight)
@@ -278,12 +337,6 @@ function ListWidget:Refresh()
         maxWidth = max(maxWidth, button:GetLabelFontString():GetStringWidth())
         
         bIndex = bIndex + 1
-    end
-    
-    if self:GetEndIndex() > 0 then
-        for i = self:GetEndIndex() + 1, self:GetChildrenCount() do
-            self:GetChild(i):Hide()
-        end
     end
     
     if self.__autoSize then

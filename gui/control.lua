@@ -57,7 +57,7 @@ function Control:GetProfileValue()
     return copyTable(profile)
 end
 
-function Control:SetProfileValue(value)
+function Control:SetProfileValue(value, replace)
     local profile = getProfile(self.__dbname)
     if not profile then
         return
@@ -65,7 +65,7 @@ function Control:SetProfileValue(value)
     
     for i, key in ipairs(self.__dbkeys) do
         if i == #self.__dbkeys then
-            profile[key] = mergeTable(profile[key], value)
+            profile[key] = replace and copyTable(value) or mergeTable(profile[key], value)
         else
             profile = profile[key]
         end

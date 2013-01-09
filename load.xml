@@ -6,7 +6,9 @@
     <Script file="db.lua"/>
     <Script file="addon.lua"/>
     <Script file="module.lua"/>
-    <Include file="gui\gui.xml"/>
+    
     <Script file="locale\zhCN.lua"/>
+    
+    <Include file="gui\gui.xml"/>
     <Script file="option.lua"/>
 </Ui>

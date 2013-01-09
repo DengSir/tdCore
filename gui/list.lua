@@ -19,6 +19,14 @@ function List:GetItem(i)
     return self[i]
 end
 
+function List:InsertItem(item)
+    tinsert(self, item)
+end
+
+function List:RemoveItem(index)
+    tremove(self, index)
+end
+
 function List:IterateItems()
     return ipairs(self)
 end

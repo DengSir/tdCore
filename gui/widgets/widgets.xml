@@ -8,6 +8,7 @@
     <Script file="scrollbar.lua"/>
     <Script file="widget.lua"/>
     <Script file="textedit.lua"/>
+    <Script file="listwidgetbutton.lua"/>
     <Script file="listwidgetitem.lua"/>
     <Script file="listwidget.lua"/>
     <Script file="colorbox.lua"/>

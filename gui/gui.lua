@@ -99,6 +99,7 @@ function GUI:CreateGUI(data, parent, uiparent)
     Set.SetMaxCount(obj, data.maxCount)
     Set.SetAllowOrder(obj, data.allowOrder)
     Set.SetSelectMode(obj, data.selectMode)
+    Set.SetExtraButton(obj, data.extraButtons)
     
     -- MinimapButton
     Set.SetAngle(obj, data.angle)
