@@ -8,6 +8,7 @@
     <Script file="module.lua"/>
     
     <Script file="locale\zhCN.lua"/>
+    <Script file="locale\zhTW.lua"/>
     
     <Include file="gui\gui.xml"/>
     <Script file="option.lua"/>
