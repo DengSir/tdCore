@@ -14,12 +14,13 @@ L['You change the configuration of some addons, you want to save ?'] = '你修�
 L['Are you sure to reset the addon |cffff0000[%s]|r configuration file?'] = '你确定要恢复插件|cffff0000[%s]|r的默认配置？'
 L['Are you sure to delete the selected item?'] = '你确定要删除所选条目？'
 
-L['Addon Name:'] = '插件名称：'
+L['Addon Name:']    = '插件名称：'
 L['Addon Version:'] = '插件版本：'
-L['Addon Author:'] = '插件作者：'
-L['Author Email:'] = '作者邮箱：'
-L['Author Weibo:'] = '作者微博：'
-L['Author GitHub:'] = '作者GitHub：'
+L['Addon Author:']  = '插件作者：'
+L['Tencent Weibo:'] = '腾讯微博：'
+L['Sina Weibo:']    = '新浪微博：'
 
 L['Select all'] = '全部选择'
 L['Select none'] = '全部不选择'
+
+L['Profile manager'] = '配置文件管理'

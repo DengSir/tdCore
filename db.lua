@@ -1,6 +1,7 @@
 
 local next, pairs, wipe = next, pairs, wipe
 local format = string.format
+local tinsert, sort = table.insert, table.sort
 local tdCore = tdCore
 
 local DB = tdCore:NewLibrary('DB', tdCore.DB, 1)
@@ -61,6 +62,10 @@ function DB:NewProfile()
     self.__profile = self.__db[PROFILE_KEY]
     
     return self.__profile
+end
+
+function DB:CopyProfile(key)
+    self.__profile = copyTable(copyTable({}, self.__db[key]), self:GetDefaultProfile())
 end
 
 function DB:DeleteProfile(key)
@@ -134,4 +139,15 @@ end
 
 function DB:RemoveDefault()
     removeTable(self:GetCurrentProfile(), self:GetDefaultProfile())
+end
+
+function DB:GetProfileList()
+    local list = {}
+    for key in self:IterateProfiles() do
+        if key ~= PROFILE_KEY then
+            tinsert(list, key)
+        end
+    end
+    sort(list)
+    return list
 end

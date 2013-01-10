@@ -10,7 +10,8 @@ local L = tdCore:GetLocale('tdCore')
 local addons = {}
 local options = {}
 
-local OptionFrame = GUI:CreateGUI({
+local OptionFrame
+OptionFrame = GUI:CreateGUI({
     type = 'MainFrame', label = L['Taiduo\'s Addons'], allowEscape = true,
     width = 800, height = 600, orientation = 'HORIZONTAL',
     padding = {20, -20, -50, 50},
@@ -18,27 +19,21 @@ local OptionFrame = GUI:CreateGUI({
         type = 'ListWidget', label = ADDONS, itemList = addons, selectMode = 'RADIO', 
         width = 180, horizontalArgs = {180, 0, 0, 0}, name = 'AddonsList',
         scripts = {
-            OnItemClick = function(self, index)
-                self:GetParent():SetAddon(self:GetItemValue(index))
-            end,
+            OnItemClick = function(self, index) OptionFrame:SetAddon(self:GetItemValue(index)) end,
         }
     },
     {
-        type = 'Button', label = DEFAULTS, name = 'ButtonDefault',
-        point = {'BOTTOMLEFT', 20, 20},
+        type = 'Button', label = L['Profile manager'], name = 'ProfileManagerButton',
+        point = {'BOTTOMLEFT', 20, 20}, width = 130,
         scripts = {
-            OnClick = function(self)
-                self:GetParent():OnDefault()
-            end,
+            OnClick = function() OptionFrame:OnSettings() end,
         }
     },
     {
         type = 'Button', label = CANCEL,
         point = {'BOTTOMRIGHT', -20, 20},
         scripts = {
-            OnClick = function(self)
-                self:GetParent():Hide()
-            end,
+            OnClick = function(self) OptionFrame:Hide() end,
         }
     },
     {
@@ -46,14 +41,33 @@ local OptionFrame = GUI:CreateGUI({
         point = {'BOTTOMRIGHT', -125, 20},
         scripts = {
             OnClick = function(self)
-                self:GetParent().__okay = true
-                self:GetParent():Hide()
+                OptionFrame.__okay = true
+                OptionFrame:Hide()
             end,
         },
     },
+    {
+        type = 'Widget', name = 'ProfileManagerWidget',
+        {
+            type = 'ComboBox', label = L['Copy Profile'], name = 'ProfileManagerCopy',
+            scripts = {
+                OnValueChanged = function(self, value) OptionFrame:OnCopy(value) end,
+            },
+        },
+        {
+            type = 'ComboBox', label = L['Remove Profile'], name = 'ProfileManagerDelete',
+            scripts = {
+                OnValueChanged = function(self, value) OptionFrame:OnDelete(value) end,
+            },
+        },
+        {
+            type = 'Button', label = DEFAULTS,
+            scripts = {
+                OnClick = function(self) OptionFrame:OnDefault() end,
+            }
+        },
+    }
 })
-
-OptionFrame.addonList = OptionFrame:GetControl('AddonsList')
 
 OptionFrame:HookScript('OnHide', function()
     if OptionFrame.__okay then
@@ -69,14 +83,15 @@ function OptionFrame:GetAddon()
 end
 
 function OptionFrame:SetAddon(opt)
+    self:GetControl('ProfileManagerWidget'):Hide()
     for k, obj in pairs(options) do
         if obj == opt then
-            self.addonList:SetSelected(opt)
+            self:GetControl('AddonsList'):SetSelected(opt)
             self.__currentAddon = obj:GetAddon()
             if obj:GetAddon():GetProfile() then
-                self:GetControl('ButtonDefault'):Enable()
+                self:GetControl('ProfileManagerButton'):Enable()
             else
-                self:GetControl('ButtonDefault'):Disable()
+                self:GetControl('ProfileManagerButton'):Disable()
             end
             obj:Show()
         else
@@ -124,6 +139,14 @@ function OptionFrame:OnCancel()
         })
 end
 
+function OptionFrame:OnSettings()
+    local addon = self:GetAddon()
+    if not addon then return end
+    
+    self:GetAddon():GetOption():Hide()
+    self:GetControl('ProfileManagerWidget'):Show()
+end
+
 function OptionFrame:OnDefault()
     local addon = self:GetAddon()
     if not addon then return end
@@ -134,14 +157,51 @@ function OptionFrame:OnDefault()
             label = L['Are you sure to reset the addon |cffff0000[%s]|r configuration file?']:format(addon:GetTitle()),
             buttons = {GUI.DialogButton.Reset, GUI.DialogButton.Cancel},
             func = function(result)
-                if result == GUI.DialogButton.Reset and addon:GetDB() then
-                    local db = addon:GetDB()
-                    if db then
-                        db:ResetProfile()
-                        addon:UpdateProfile()
-                        addon:GetOption():Update()
-                        db:BackupCurrentProfile()
+                if result == GUI.DialogButton.Reset then
+                    addon:GetDB():ResetProfile()
+                    addon:GetDB():BackupCurrentProfile()
+                    addon:UpdateProfile()
+                    if addon.__reloaduiWhileReset then
+                        ReloadUI()
                     end
+                end
+            end,
+        })
+end
+
+function OptionFrame:OnCopy(key)
+    local addon = self:GetAddon()
+    if not addon then return end
+    
+    GUI:ShowMenu('DialogMenu', nil, nil,
+        {
+            mode = GUI.DialogIcon.Question,
+            label = L['Are you sure %s configuration file overwrites the current configuration file?']:format(key),
+            buttons = {GUI.DialogButton.Okay, GUI.DialogButton.Cancel},
+            func = function(result)
+                if result == GUI.DialogButton.Okay then
+                    addon:GetDB():CopyProfile(key)
+                    addon:GetDB():BackupCurrentProfile()
+                    addon:UpdateProfile()
+                    self:GetControl('ProfileManagerWidget'):Update()
+                end
+            end,
+        })
+end
+
+function OptionFrame:OnDelete(key)
+    local addon = self:GetAddon()
+    if not addon then return end
+    
+    GUI:ShowMenu('DialogMenu', nil, nil,
+        {
+            mode = GUI.DialogIcon.Question,
+            label = L['Are you sure to delete %s configuration file?']:format(key),
+            buttons = {GUI.DialogButton.Okay, GUI.DialogButton.Cancel},
+            func = function(result)
+                if result == GUI.DialogButton.Okay then
+                    addon:GetDB():DeleteProfile(key)
+                    self:GetControl('ProfileManagerWidget'):Update()
                 end
             end,
         })
@@ -164,10 +224,6 @@ local function OptionGetDB(self)
     return self.__addon and self.__addon:GetDB()
 end
 
-local function OptionGetTitle(self)
-    return 
-end
-
 local Addon = tdCore.Addon
 
 function Addon:InitOption(gui, title)
@@ -188,10 +244,10 @@ function Addon:InitOption(gui, title)
     
     if obj:IsWidgetType('Widget') then
         obj:SetPoint('BOTTOMRIGHT', -20, 50)
-        obj:SetPoint('TOPLEFT', OptionFrame.addonList, 'TOPRIGHT', 10, 0)
+        obj:SetPoint('TOPLEFT', OptionFrame:GetControl('AddonsList'), 'TOPRIGHT', 10, 0)
     elseif obj:IsWidgetType('TabWidget') then
         obj:SetPoint('BOTTOMRIGHT', -19, 49)
-        obj:SetPoint('TOPLEFT', OptionFrame.addonList, 'TOPRIGHT', 9, 22)
+        obj:SetPoint('TOPLEFT', OptionFrame:GetControl('AddonsList'), 'TOPRIGHT', 9, 22)
     else
         error('error obj type ' .. obj:GetWidgetType())
     end
@@ -232,6 +288,26 @@ GUI:SetHandle('OnSlashCmd', GUI.ToggleOption)
 GUI:InitOption({
     type = 'Widget', label = L['About'], name = 'AboutWidget',
 }, L['About'])
+
+do
+    local widget = OptionFrame:GetControl('ProfileManagerWidget')
+    widget:SetPoint('BOTTOMRIGHT', -20, 50)
+    widget:SetPoint('TOPLEFT', OptionFrame:GetControl('AddonsList'), 'TOPRIGHT', 10, 0)
+    
+    function widget:Update()
+        self:SetLabelText(OptionFrame:GetAddon():GetTitle() .. ' ' .. L['Profile manager'])
+        
+        local list = OptionFrame:GetAddon():GetDB():GetProfileList()
+        
+        OptionFrame:GetControl('ProfileManagerCopy'):SetItemList(list)
+        OptionFrame:GetControl('ProfileManagerDelete'):SetItemList(list)
+        
+        OptionFrame:GetControl('ProfileManagerCopy'):Update()
+        OptionFrame:GetControl('ProfileManagerDelete'):Update()
+    end
+    
+    widget:SetScript('OnShow', widget.Update)
+end
 
 do
     local widget = GUI:GetOptionControl('AboutWidget')
@@ -301,17 +377,19 @@ do
         editbox:SetPoint(...)
     end
     
-    CreateLabel(L['Addon Name:'],    'GameFontNormalSmall', 'TOPLEFT', 50, -50)
-    CreateLabel(L['Addon Version:'], 'GameFontNormalSmall', 'TOPLEFT', 50, -100)
-    CreateLabel(L['Addon Author:'],  'GameFontNormalSmall', 'TOPLEFT', 50, -150)
-    CreateLabel(L['Author Email:'],  'GameFontNormalSmall', 'TOPLEFT', 50, -200)
-    CreateLabel(L['Author Weibo:'],  'GameFontNormalSmall', 'TOPLEFT', 50, -250)
-    CreateLabel(L['Author GitHub:'],    'GameFontNormalSmall', 'TOPLEFT', 50, -300)
+    CreateLabel(L['Addon Name:'],       'GameFontNormalSmall', 'TOPLEFT', 50, -50)
+    CreateLabel(L['Addon Version:'],    'GameFontNormalSmall', 'TOPLEFT', 50, -100)
+    CreateLabel(L['Addon Author:'],     'GameFontNormalSmall', 'TOPLEFT', 50, -150)
+    CreateLabel('Email:',               'GameFontNormalSmall', 'TOPLEFT', 50, -200)
+    CreateLabel('GitHub:',              'GameFontNormalSmall', 'TOPLEFT', 50, -250)
+    CreateLabel(L['Tencent Weibo:'],    'GameFontNormalSmall', 'TOPLEFT', 50, -300)
+    CreateLabel(L['Sina Weibo:'],       'GameFontNormalSmall', 'TOPLEFT', 50, -350)
     
     CreateLabel(GetAddOnInfo('tdCore'),                 'GameFontHighlightSmall', 'TOPLEFT', 200, -50)
     CreateLabel(GetAddOnMetadata('tdCore', 'Version'),  'GameFontHighlightSmall', 'TOPLEFT', 200, -100)
     CreateLabel(GetAddOnMetadata('tdCore', 'Author'),   'GameFontHighlightSmall', 'TOPLEFT', 200, -150)
-    CreateEditbox('ldz5@qq.com',                'TOPLEFT', 192, -200)
-    CreateEditbox('http://t.qq.com/taiduo_ldz', 'TOPLEFT', 192, -250)
-    CreateEditbox('http://github.com/dengsir',  'TOPLEFT', 192, -300)
+    CreateEditbox('ldz5@qq.com',                    'TOPLEFT', 192, -200)
+    CreateEditbox('http://github.com/dengsir',      'TOPLEFT', 192, -250)
+    CreateEditbox('http://t.qq.com/taiduo_ldz',     'TOPLEFT', 192, -300)
+    CreateEditbox('http://www.weibo.com/tdaddon',   'TOPLEFT', 192, -350)
 end

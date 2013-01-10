@@ -67,9 +67,10 @@ end
 
 ------ db
 
-function Addon:InitDB(name, defaultProfile)
+function Addon:InitDB(name, defaultProfile, reloaduiWhileReset)
     self.__db = tdCore.DB:New(name, defaultProfile)
     self.__db:NewProfile()
+    self.__reloaduiWhileReset = reloaduiWhileReset
 end
 
 function Addon:GetDB()
