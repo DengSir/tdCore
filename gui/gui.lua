@@ -2,7 +2,7 @@
 local error, ipairs, pairs, setmetatable, type = error, ipairs, pairs, setmetatable, type
 local tdCore = tdCore
 
-local GUI = tdCore:NewAddon('GUI', {}, 3)
+local GUI = tdCore:NewAddon('GUI', {}, 4)
 
 function GUI:GetWidgetType(obj)
     if type(obj) == 'table' and type(obj.GetWidgetType) == 'function' then
