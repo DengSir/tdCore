@@ -4,7 +4,7 @@ local GUI = tdCore('GUI')
 local Widget = GUI:NewModule('Widget', CreateFrame('ScrollFrame'), 'UIObject', 'View', 'Control')
 Widget:SetPadding(10, -10, 10, 10)
 
-function Widget:New(parent)
+function Widget:New(parent, noScroll)
     local obj = self:Bind(CreateFrame('ScrollFrame', nil, parent))
     if parent then
         obj.__children = {}
@@ -19,15 +19,19 @@ function Widget:New(parent)
         obj:SetBackdropColor(0, 0, 0, .4)
         obj:SetBackdropBorderColor(1, 1, 1, 1)
         obj:GetLabelFontString():SetPoint('BOTTOMLEFT', obj, 'TOPLEFT')
+        
+        if not noScroll then
+            obj:EnableScroll()
+        end
     end
     return obj
 end
 
 function Widget:EnableScroll(child, scrollStep)
     if not child then
-        local child = CreateFrame('Frame', nil, self)
+        child = CreateFrame('Frame', nil, self)
         child:SetPoint('CENTER')
-        child:SetSize(self:GetSize())
+        child:SetSize(100, 100)
     end
     
     if type(scrollStep) == 'number' then
@@ -35,10 +39,10 @@ function Widget:EnableScroll(child, scrollStep)
     end
     self.__scrollBar = GUI('ScrollBar'):New(self)
     self.__childParent = child
-    self:SetScrollChild(self.__childParent)
+    self:SetScrollChild(child)
     self:EnableMouseWheel(true)
     self:SetScript('OnMouseWheel', self.OnMouseWheel)
-    self:SetScript('OnSizeChanged', self.OnScrollRangeChanged)
+    self:SetScript('OnSizeChanged', self.OnSizeChanged)
     self:SetScript('OnScrollRangeChanged', self.OnScrollRangeChanged)
 end
 
@@ -64,6 +68,11 @@ function Widget:OnMouseWheel(y)
     else
         self.__scrollBar:Down(self:GetWheelStep())
     end
+end
+
+function Widget:OnSizeChanged()
+    self:OnScrollHide()
+    self:OnScrollRangeChanged()
 end
 
 function Widget:OnScrollRangeChanged()

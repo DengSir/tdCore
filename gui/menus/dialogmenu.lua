@@ -5,7 +5,7 @@ local L = tdCore:GetLocale('tdCore')
 
 local ICON_SIZE, BUTTON_WIDTH, BUTTON_HEIGHT, MENU_PADDING = 64, 100, 22, 10
 
-local DialogMenu = GUI:NewMenu('DialogMenu', GUI('Widget'):New(UIParent), 180)
+local DialogMenu = GUI:NewMenu('DialogMenu', GUI('Widget'):New(UIParent, true), 180)
 
 GUI.DialogButton = {
     Okay    = OKAY,

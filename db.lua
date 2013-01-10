@@ -66,6 +66,7 @@ end
 
 function DB:CopyProfile(key)
     self.__profile = copyTable(copyTable({}, self.__db[key]), self:GetDefaultProfile())
+    self.__db[PROFILE_KEY] = self.__profile
 end
 
 function DB:DeleteProfile(key)

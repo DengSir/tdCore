@@ -72,7 +72,6 @@ function View:AddWidgetVertical(obj, height, yOffset, xOffsetLeft, xOffsetRight)
         height, yOffset, xOffsetLeft, xOffsetRight = obj:GetVerticalArgs()
     end
     if not height then
---        self:Debug('vertical args error')
         return
     end
     if self.__childOffset == -1 then
@@ -109,7 +108,6 @@ function View:AddWidgetHorizontal(obj, width, xOffset, yOffsetTop, yOffsetBottom
         width, xOffset, yOffsetTop, yOffsetBottom = obj:GetHorizontalArgs()
     end
     if not width then
---        self:Debug('horizontal args error')
         return
     end
     if self.__childOffset == -1 then

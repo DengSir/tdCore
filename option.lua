@@ -61,9 +61,15 @@ OptionFrame = GUI:CreateGUI({
             },
         },
         {
-            type = 'Button', label = DEFAULTS,
+            type = 'Button', label = DEFAULTS, width = 150,
             scripts = {
-                OnClick = function(self) OptionFrame:OnDefault() end,
+                OnClick = function() OptionFrame:OnDefault() end,
+            }
+        },
+        {
+            type = 'Button', label = L['Return addon option'], width = 150,
+            scripts = {
+                OnClick = function() OptionFrame:SetAddon(OptionFrame:GetAddon():GetOption()) end
             }
         },
     }
@@ -154,15 +160,17 @@ function OptionFrame:OnDefault()
     GUI:ShowMenu('DialogMenu', self, nil,
         {
             mode = GUI.DialogIcon.Question,
-            label = L['Are you sure to reset the addon |cffff0000[%s]|r configuration file?']:format(addon:GetTitle()),
+            label = L['Are you sure to reset the addon |cffff0000[%s]|r configuration file?']:format(addon:GetTitle())
+                .. (addon.__reloaduiWhileReset and L[' And will reload addon'] or ''),
             buttons = {GUI.DialogButton.Reset, GUI.DialogButton.Cancel},
             func = function(result)
                 if result == GUI.DialogButton.Reset then
                     addon:GetDB():ResetProfile()
-                    addon:GetDB():BackupCurrentProfile()
-                    addon:UpdateProfile()
                     if addon.__reloaduiWhileReset then
                         ReloadUI()
+                    else
+                        addon:GetDB():BackupCurrentProfile()
+                        addon:UpdateProfile()
                     end
                 end
             end,
@@ -176,7 +184,7 @@ function OptionFrame:OnCopy(key)
     GUI:ShowMenu('DialogMenu', nil, nil,
         {
             mode = GUI.DialogIcon.Question,
-            label = L['Are you sure %s configuration file overwrites the current configuration file?']:format(key),
+            label = L['Are you sure overwrites the current configuration file to |cffffffff[%s]|r?']:format(key),
             buttons = {GUI.DialogButton.Okay, GUI.DialogButton.Cancel},
             func = function(result)
                 if result == GUI.DialogButton.Okay then
@@ -196,7 +204,7 @@ function OptionFrame:OnDelete(key)
     GUI:ShowMenu('DialogMenu', nil, nil,
         {
             mode = GUI.DialogIcon.Question,
-            label = L['Are you sure to delete %s configuration file?']:format(key),
+            label = L['Are you sure to delete configuration file |cffffffff[%s]|r?']:format(key),
             buttons = {GUI.DialogButton.Okay, GUI.DialogButton.Cancel},
             func = function(result)
                 if result == GUI.DialogButton.Okay then
@@ -294,16 +302,21 @@ do
     widget:SetPoint('BOTTOMRIGHT', -20, 50)
     widget:SetPoint('TOPLEFT', OptionFrame:GetControl('AddonsList'), 'TOPRIGHT', 10, 0)
     
+    local combobox = OptionFrame:GetControl('ProfileManagerCopy')
+    combobox:SetValueText(L['Please choose profile ...'])
+    combobox:GetValueFontString():SetPoint('LEFT', 10, 0)
+    
+    local combobox =  OptionFrame:GetControl('ProfileManagerDelete')
+    combobox:SetValueText(L['Please choose profile ...'])
+    combobox:GetValueFontString():SetPoint('LEFT', 10, 0)
+    
     function widget:Update()
-        self:SetLabelText(OptionFrame:GetAddon():GetTitle() .. ' ' .. L['Profile manager'])
+        self:SetLabelText(OptionFrame:GetAddon():GetTitle() .. ' - ' .. L['Profile manager'])
         
         local list = OptionFrame:GetAddon():GetDB():GetProfileList()
         
         OptionFrame:GetControl('ProfileManagerCopy'):SetItemList(list)
         OptionFrame:GetControl('ProfileManagerDelete'):SetItemList(list)
-        
-        OptionFrame:GetControl('ProfileManagerCopy'):Update()
-        OptionFrame:GetControl('ProfileManagerDelete'):Update()
     end
     
     widget:SetScript('OnShow', widget.Update)

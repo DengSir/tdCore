@@ -3,7 +3,7 @@ local GUI = tdCore('GUI')
 
 local ColorButton = GUI('ColorButton')
 
-local ColorMenu = GUI:NewMenu('ColorMenu', GUI('Widget'):New(UIParent))
+local ColorMenu = GUI:NewMenu('ColorMenu', GUI('Widget'):New(UIParent, true))
 
 function ColorMenu:SetColor(r, g, b)
     self.colorSelect:SetColorRGB(r, g, b)
