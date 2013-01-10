@@ -3,10 +3,9 @@ local lib, version = 'tdCore', 3
 
 if _G[lib] and _G[lib].version >= version then return end
 
-_G[lib] = CreateFrame('Frame')
+_G[lib] = {}
 
 local tdCore = _G[lib]
-tdCore:Hide()
 
 tdCore.Addon = {}
 tdCore.Locale = {}
@@ -54,8 +53,10 @@ function tdCore:Debug(name, ...)
     end
 end
 
-function tdCore:ADDON_LOADED(event, name)
-    local addon = self:GetAddon(name)
+local frame = CreateFrame('Frame') frame:Hide()
+
+function frame:ADDON_LOADED(event, name)
+    local addon = tdCore:GetAddon(name)
     if addon then
         if addon.OnInit then
             addon:OnInit()
@@ -69,17 +70,16 @@ function tdCore:ADDON_LOADED(event, name)
     end
 end
 
-function tdCore:PLAYER_LOGOUT()
-    for _, addon in self:IterateAddons() do
+function frame:PLAYER_LOGOUT()
+    for _, addon in tdCore:IterateAddons() do
         if addon:GetDB() then
             addon:GetDB():RemoveDefault()
         end
     end
 end
 
-tdCore:SetScript('OnEvent', tdCore.OnEvent)
-tdCore:RegisterEvent('ADDON_LOADED')
-tdCore:RegisterEvent('PLAYER_LOGOUT')
+frame:SetScript('OnEvent', tdCore.OnEvent)
+frame:RegisterEvent('ADDON_LOADED')
+frame:RegisterEvent('PLAYER_LOGOUT')
 
-tdCore.__call = tdCore.GetAddon
-setmetatable(tdCore, tdCore)
+setmetatable(tdCore, {__call = tdCore.GetAddon})
