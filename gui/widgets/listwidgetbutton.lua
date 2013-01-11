@@ -32,7 +32,6 @@ function ListWidgetButton:New(parent, type)
     
     obj.type = type
     
-    obj:SetSize(24, 24)
     obj:SetScript('OnClick', self.OnClick)
     obj:SetNote(ListButtonNote[type])
     

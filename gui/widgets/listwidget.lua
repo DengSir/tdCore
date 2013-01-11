@@ -3,6 +3,7 @@ local GUI = tdCore('GUI')
 local L = tdCore:GetLocale('tdCore')
 
 local LIST_SPACING = 5
+local EXTRA_BUTTON_SIZE = 24
 
 local List = GUI('List')
 local ListWidget = GUI:NewModule('ListWidget', CreateFrame('Frame'), 'UIObject', 'View', 'Control', 'Update')
@@ -61,6 +62,7 @@ function ListWidget:OnDelete()
                     end
                     self:SetProfileValue(self:GetItemList(), true)
                     self:Refresh()
+                    self:SelectAll(false)
                 end
             end,
         })
@@ -80,7 +82,7 @@ function ListWidget:OnScrollValueChanged(value)
 end
 
 function ListWidget:OnSizeChanged(width, height)
-    self.__maxCount = floor((height - LIST_SPACING * 2 - (self.extraButtons and #self.extraButtons > 0 and 34 or 0))
+    self.__maxCount = floor((height - LIST_SPACING * 2 - (self:GetExtraButtonCount() > 0 and EXTRA_BUTTON_SIZE + 10 or 0))
         / (self:GetItemHeight() + self:GetItemSpacing()))
     self:Refresh()
 end
@@ -153,25 +155,30 @@ function ListWidget:GetSelectMode()
     return self.__selectMode or 'NONE'
 end
 
-function ListWidget:GetExtraButton(index, type)
-    if not self.extraButtons[index] then
-        self.extraButtons[index] = GUI('ListWidgetButton'):New(self, type)
+function ListWidget:CreateExtraButton(index, type)
+    if not self.__extraButtons[index] then
+        self.__extraButtons[index] = GUI('ListWidgetButton'):New(self, type)
+        self.__extraButtons[index]:SetSize(EXTRA_BUTTON_SIZE, EXTRA_BUTTON_SIZE)
     end
-    return self.extraButtons[index]
+    return self.__extraButtons[index]
 end
 
 function ListWidget:SetExtraButton(list)
-    self.extraButtons = self.extraButtons or {}
+    self.__extraButtons = self.__extraButtons or {}
     for i, type in ipairs(list) do
-        local button = self:GetExtraButton(i, type)
+        local button = self:CreateExtraButton(i, type)
         
         button:ClearAllPoints()
         if i == 1 then
             button:SetPoint('BOTTOMLEFT', 10, 10)
         else
-            button:SetPoint('LEFT', self.extraButtons[i-1], 'RIGHT', 8, 0)
+            button:SetPoint('LEFT', self.__extraButtons[i-1], 'RIGHT', 8, 0)
         end
     end
+end
+
+function ListWidget:GetExtraButtonCount()
+    return self.__extraButtons and #self.__extraButtons or 0
 end
 
 function ListWidget:SetAllowOrder(allowOrder)
@@ -291,7 +298,7 @@ function ListWidget:Update()
     self:Refresh()
 end
 
-function ListWidget:GetButton(i)
+function ListWidget:CreateButton(i)
     if not self:GetChild(i) then
         self.__children[i] = self:GetItemObject():New(self)
     end
@@ -312,7 +319,7 @@ function ListWidget:Refresh()
     local scrollShown = self.__scrollBar:IsShown()
     
     for i = start, self:GetEndIndex() do
-        local button = self:GetButton(bIndex)
+        local button = self:CreateButton(bIndex)
         button:SetHeight(itemHeight)
         button:SetChecked(self:GetSelected(i) or nil)
         button:SetIndex(i)
@@ -344,7 +351,8 @@ function ListWidget:Refresh()
     
     if self.__autoSize then
         self:SetSize(max(maxWidth + 20 + (scrollShown and 20 or 0), 100),
-            min(self:GetMaxCount(), self:GetItemCount()) * (itemHeight + itemSpacing) - itemSpacing + 4 * LIST_SPACING)
+            min(self:GetMaxCount(), self:GetItemCount()) * (itemHeight + itemSpacing) - itemSpacing + 4 * LIST_SPACING +
+            (self:GetExtraButtonCount() > 0 and EXTRA_BUTTON_SIZE + 10 or 0))
     end
 end
 
@@ -409,7 +417,7 @@ function ListWidget:GetScreenClamped()
     return  - (left + LIST_SPACING),
             screenWidth - left - width + LIST_SPACING + (self.__scrollBar:IsShown() and 20 or 0),
             screenHeight - bottom - height + LIST_SPACING,
-            - bottom - LIST_SPACING
+            - bottom - LIST_SPACING - (self:GetExtraButtonCount() and EXTRA_BUTTON_SIZE + 10 or 0)
 end
 
 function ListWidget:GetMoveToIndex()

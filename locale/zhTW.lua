@@ -13,7 +13,7 @@ L['Taiduo\'s Addons'] = '太多插件'
 L['You change the configuration of some addons, you want to save ?'] = '你修改了部份插件的配置，是否保存？'
 L['Are you sure to reset the addon |cffff0000[%s]|r configuration file?'] = '你確定要恢復插件|cffff0000[%s]|r的默認配置？'
 L['Are you sure to delete the selected item?'] = '你確定要刪除所選條目？'
-L[' And will reload addon'] = '并且会重新载入插件。'
+L[' And will reload addon'] = '并且会重新载入插件。'
 
 L['Addon Name:'] = '插件名稱：'
 L['Addon Version:'] = '插件版本：'
