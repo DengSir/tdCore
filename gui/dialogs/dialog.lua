@@ -53,7 +53,7 @@ function Dialog:New(parent)
             edgeSize = 14, tileSize = 20, tile = true,
             insets = {left = 2, right = 2, top = 2, bottom = 2},
         }
-        obj:SetBackdropColor(0, 0, 0, 0.7)
+        obj:SetBackdropColor(0, 0, 0, 0.8)
         obj:SetBackdropBorderColor(1, 1, 1, 1)
         
         obj:Hide()
