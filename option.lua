@@ -15,6 +15,16 @@ OptionFrame = GUI:CreateGUI({
     type = 'MainFrame', label = L['Taiduo\'s Addons'], allowEscape = true,
     width = 800, height = 600, orientation = 'HORIZONTAL',
     padding = {20, -20, -50, 50},
+    scripts = {
+        OnHide = function(self)
+            if OptionFrame.__okay then
+                OptionFrame:OnOkay()
+            else
+                OptionFrame:OnCancel()
+            end
+            OptionFrame.__okay = nil
+        end,
+    },
     {
         type = 'ListWidget', label = ADDONS, itemList = addons, selectMode = 'RADIO', 
         width = 180, horizontalArgs = {180, 0, 0, 0}, name = 'AddonsList',
@@ -75,14 +85,13 @@ OptionFrame = GUI:CreateGUI({
     }
 })
 
-OptionFrame:HookScript('OnHide', function()
-    if OptionFrame.__okay then
-        OptionFrame:OnOkay()
-    else
-        OptionFrame:OnCancel()
-    end
-    OptionFrame.__okay = nil
-end)
+local function iter()
+    
+end
+
+function OptionFrame:IterateOptions()
+    return pairs(options)
+end
 
 function OptionFrame:GetAddon()
     return self.__currentAddon
@@ -126,23 +135,28 @@ function OptionFrame:OnCancel()
     end
     if not unsave then return end
     
-    GUI:ShowMenu('DialogMenu', nil, nil,
-        {
-            mode = GUI.DialogIcon.Warning,
-            label = L['You change the configuration of some addons, you want to save ?'],
-            buttons = {GUI.DialogButton.Save, GUI.DialogButton.Ignore},
-            func = function(result)
-                if result ~= GUI.DialogButton.Save then
-                    for _, obj in pairs(options) do
-                        local db = obj:GetDB()
-                        if db and db:IsProfileChanged() then
-                            db:RestoreCurrentProfile()
-                            obj:GetAddon():UpdateProfile()
-                        end
-                    end
+    self:ShowDialog(
+        'Dialog',
+        L['You change the configuration of some addons, you want to save ?'],
+        GUI.DialogIcon.Warning, 
+        function()
+            for _, obj in pairs(options) do
+                local db = obj:GetDB()
+                if db then
+                    db:RemoveBackupProfile()
                 end
-            end,
-        })
+            end
+        end,
+        function()
+            for _, obj in pairs(options) do
+                local db = obj:GetDB()
+                if db and db:IsProfileChanged() then
+                    db:RestoreCurrentProfile()
+                    obj:GetAddon():UpdateProfile()
+                end
+            end
+        end
+    )
 end
 
 function OptionFrame:OnSettings()
@@ -157,62 +171,52 @@ function OptionFrame:OnDefault()
     local addon = self:GetAddon()
     if not addon then return end
     
-    GUI:ShowMenu('DialogMenu', self, nil,
-        {
-            mode = GUI.DialogIcon.Question,
-            label = L['Are you sure to reset the addon |cffff0000[%s]|r configuration file?']:format(addon:GetTitle())
-                .. (addon.__reloaduiWhileReset and L[' And will reload addon'] or ''),
-            buttons = {GUI.DialogButton.Reset, GUI.DialogButton.Cancel},
-            func = function(result)
-                if result == GUI.DialogButton.Reset then
-                    addon:GetDB():ResetProfile()
-                    if addon.__reloaduiWhileReset then
-                        ReloadUI()
-                    else
-                        addon:GetDB():BackupCurrentProfile()
-                        addon:UpdateProfile()
-                    end
-                end
-            end,
-        })
+    self:ShowDialog(
+        'Dialog',
+        L['Are you sure to reset the addon |cffff0000[%s]|r configuration file?']:format(addon:GetTitle()) .. (addon.__reloaduiWhileReset and L[' And will reload addon'] or ''),
+        GUI.DialogIcon.Warning,
+        function()
+            addon:GetDB():ResetProfile()
+            if addon.__reloaduiWhileReset then
+                ReloadUI()
+            else
+                addon:GetDB():BackupCurrentProfile()
+                addon:UpdateProfile()
+            end
+        end
+    )
 end
 
 function OptionFrame:OnCopy(key)
     local addon = self:GetAddon()
     if not addon then return end
     
-    GUI:ShowMenu('DialogMenu', nil, nil,
-        {
-            mode = GUI.DialogIcon.Question,
-            label = L['Are you sure overwrites the current configuration file to |cffffffff[%s]|r?']:format(key),
-            buttons = {GUI.DialogButton.Okay, GUI.DialogButton.Cancel},
-            func = function(result)
-                if result == GUI.DialogButton.Okay then
-                    addon:GetDB():CopyProfile(key)
-                    addon:GetDB():BackupCurrentProfile()
-                    addon:UpdateProfile()
-                    self:GetControl('ProfileManagerWidget'):Update()
-                end
-            end,
-        })
+    self:ShowDialog(
+        'Dialog',
+        L['Are you sure overwrites the current configuration file to |cffffffff[%s]|r?']:format(key),
+        GUI.DialogIcon.Question,
+        function()
+            addon:GetDB():CopyProfile(key)
+            addon:GetDB():BackupCurrentProfile()
+            addon:UpdateProfile()
+            self:GetControl('ProfileManagerWidget'):Update()
+        end
+    )
 end
 
 function OptionFrame:OnDelete(key)
     local addon = self:GetAddon()
     if not addon then return end
     
-    GUI:ShowMenu('DialogMenu', nil, nil,
-        {
-            mode = GUI.DialogIcon.Question,
-            label = L['Are you sure to delete configuration file |cffffffff[%s]|r?']:format(key),
-            buttons = {GUI.DialogButton.Okay, GUI.DialogButton.Cancel},
-            func = function(result)
-                if result == GUI.DialogButton.Okay then
-                    addon:GetDB():DeleteProfile(key)
-                    self:GetControl('ProfileManagerWidget'):Update()
-                end
-            end,
-        })
+    self:ShowDialog(
+        'Dialog',
+        L['Are you sure to delete configuration file |cffffffff[%s]|r?']:format(key),
+        GUI.DialogIcon.Warning,
+        function()
+            addon:GetDB():DeleteProfile(key)
+            self:GetControl('ProfileManagerWidget'):Update()
+        end
+    )
 end
 
 local function OptionOnShow(self)

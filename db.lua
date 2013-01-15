@@ -36,7 +36,7 @@ end
 function DB:New(name, defaultProfile)
     local db = self:Bind({})
     
-    _G[name] = _G[name] or {}
+    _G[name] = type(_G[name]) == 'table' and _G[name] or {}
     
     db.__db = _G[name]
     db.__name = name

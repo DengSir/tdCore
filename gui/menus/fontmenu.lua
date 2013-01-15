@@ -1,12 +1,10 @@
 ﻿
 local GUI = tdCore('GUI')
 
-local ListWidget = GUI('ListWidget')
 local ListWidgetItem = GUI('ListWidgetItem')
 local ListWidgetFontItem = GUI:NewModule('ListWidgetFontItem', ListWidgetItem:New())
 
 local FontMenu = GUI:NewMenu('FontMenu', GUI('ListWidget'):New(UIParent))
-
 
 function ListWidgetFontItem:New(parent)
     local obj = self:Bind(ListWidgetItem:New(parent))

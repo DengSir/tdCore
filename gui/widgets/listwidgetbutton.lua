@@ -18,19 +18,12 @@ local ListButtonNote = {
     SelectNone = L['Select none']
 }
 
-GUI.ListButton = {
-    Add = 'Add',
-    Delete = 'Delete',
-    SelectAll = 'SelectAll',
-    SelectNone = 'SelectNone',
-}
-
 function ListWidgetButton:New(parent, type)
     assert(GUI.ListButton[type], 'Bad argument')
     
     local obj = self:Bind(CreateFrame('Button', nil, parent))
     
-    obj.type = type
+    obj.handle = 'On' .. type
     
     obj:SetScript('OnClick', self.OnClick)
     obj:SetNote(ListButtonNote[type])
@@ -42,5 +35,5 @@ function ListWidgetButton:New(parent, type)
 end
 
 function ListWidgetButton:OnClick()
-    self:GetParent():RunHandle('On' .. self.type)
+    self:GetParent():RunHandle(self.handle)
 end

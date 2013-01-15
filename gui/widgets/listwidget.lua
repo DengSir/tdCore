@@ -5,7 +5,6 @@ local L = tdCore:GetLocale('tdCore')
 local LIST_SPACING = 5
 local EXTRA_BUTTON_SIZE = 24
 
-local List = GUI('List')
 local ListWidget = GUI:NewModule('ListWidget', CreateFrame('Frame'), 'UIObject', 'View', 'Control', 'Update')
 ListWidget:RegisterHandle('OnItemClick', 'OnAdd', 'OnDelete', 'OnSelectAll', 'OnSelectNone')
 
@@ -48,24 +47,21 @@ end
 ---- scripts
 
 function ListWidget:OnDelete()
-    GUI:ShowMenu('DialogMenu', nil, nil,
-        {
-            mode = GUI.DialogIcon.Warning,
-            label = L['Are you sure to delete the selected item?'],
-            buttons = {GUI.DialogButton.Okay, GUI.DialogButton.Cancel},
-            func = function(result)
-                if result == GUI.DialogButton.Okay then
-                    for i = self:GetItemCount(), 1, -1 do
-                        if self:GetSelected(i) then
-                            self:GetItemList():RemoveItem(i)
-                        end
-                    end
-                    self:SetProfileValue(self:GetItemList(), true)
-                    self:Refresh()
-                    self:SelectAll(false)
+    self:ShowDialog(
+        'Dialog',
+        L['Are you sure to delete the selected item?'],
+        GUI.DialogIcon.Warning,
+        function()
+            for i = self:GetItemCount(), 1, -1 do
+                if self:GetSelected(i) then
+                    self:GetItemList():RemoveItem(i)
                 end
-            end,
-        })
+            end
+            self:SetProfileValue(self:GetItemList(), true)
+            self:Refresh()
+            self:SelectAll(false)
+        end
+    )
 end
 
 function ListWidget:OnSelectAll()
@@ -163,6 +159,10 @@ function ListWidget:CreateExtraButton(index, type)
     return self.__extraButtons[index]
 end
 
+function ListWidget:GetExtraButtonCount()
+    return self.__extraButtons and #self.__extraButtons or 0
+end
+
 function ListWidget:SetExtraButton(list)
     self.__extraButtons = self.__extraButtons or {}
     for i, type in ipairs(list) do
@@ -175,10 +175,6 @@ function ListWidget:SetExtraButton(list)
             button:SetPoint('LEFT', self.__extraButtons[i-1], 'RIGHT', 8, 0)
         end
     end
-end
-
-function ListWidget:GetExtraButtonCount()
-    return self.__extraButtons and #self.__extraButtons or 0
 end
 
 function ListWidget:SetAllowOrder(allowOrder)
@@ -218,15 +214,23 @@ function ListWidget:GetItemObject()
     return self.__itemObject or GUI('ListWidgetItem')
 end
 
+function ListWidget:SetListObject(obj)
+    self.__listObject = obj
+end
+
+function ListWidget:GetListObject()
+    return self.__listObject or GUI('List')
+end
+
 function ListWidget:SetItemList(list)
-    self.__itemList = List:New(list)
+    self.__itemList = self:GetListObject():New(list)
 end
 
 function ListWidget:GetItemList()
     if not self.__itemList then
         local value = self:GetProfileValue()
         if value and type(value) == 'table' then
-            self.__itemList = List:New(value)
+            self.__itemList = self:GetListObject():New(value)
         end
     end
     return self.__itemList
@@ -293,7 +297,7 @@ end
 function ListWidget:Update()
     local value = self:GetProfileValue()
     if value and value ~= self:GetItemList() then
-        self:SetItemList(List:New(value))
+        self:SetItemList(self:GetListObject():New(value))
     end
     self:Refresh()
 end
@@ -352,7 +356,7 @@ function ListWidget:Refresh()
     if self.__autoSize then
         self:SetSize(max(maxWidth + 20 + (scrollShown and 20 or 0), 100),
             min(self:GetMaxCount(), self:GetItemCount()) * (itemHeight + itemSpacing) - itemSpacing + 4 * LIST_SPACING +
-            (self:GetExtraButtonCount() > 0 and EXTRA_BUTTON_SIZE + 10 or 0))
+            (self:GetExtraButtonCount() > 0 and EXTRA_BUTTON_SIZE or 0))
     end
 end
 
@@ -417,7 +421,7 @@ function ListWidget:GetScreenClamped()
     return  - (left + LIST_SPACING),
             screenWidth - left - width + LIST_SPACING + (self.__scrollBar:IsShown() and 20 or 0),
             screenHeight - bottom - height + LIST_SPACING,
-            - bottom - LIST_SPACING - (self:GetExtraButtonCount() and EXTRA_BUTTON_SIZE + 10 or 0)
+            - bottom - LIST_SPACING - (self:GetExtraButtonCount() > 0 and (EXTRA_BUTTON_SIZE + 10) or 0)
 end
 
 function ListWidget:GetMoveToIndex()

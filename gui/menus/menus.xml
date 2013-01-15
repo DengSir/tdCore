@@ -3,5 +3,4 @@
     <Script file="colormenu.lua"/>
     <Script file="fontmenu.lua"/>
     <Script file="combomenu.lua"/>
-    <Script file="dialogmenu.lua"/>
 </Ui>

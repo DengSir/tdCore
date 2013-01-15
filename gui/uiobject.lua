@@ -186,4 +186,12 @@ function UIObject:SetPoints(...)
     end
 end
 
+function UIObject:ToggleMenu(menu, ...)
+    GUI:ToggleMenu(menu, self, ...)
+end
+
+function UIObject:ShowDialog(name, text, ...)
+    GUI:ShowDialog(name, self, text, ...)
+end
+
 tdCore('GUI'):RegisterEmbed('UIObject', UIObject)

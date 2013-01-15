@@ -26,6 +26,7 @@ end
 
 local ColorBox = GUI:NewModule('ColorBox', ColorButton:New(), 'Control')
 ColorBox:SetVerticalArgs(40, 0, 0)
+ColorBox:RegisterHandle('OnColorChanged')
 
 function ColorBox:New(parent)
     local obj = self:Bind(ColorButton:New(parent))
@@ -39,6 +40,7 @@ function ColorBox:New(parent)
     obj:SetHitRectInsets(0, -100, 0, 0)
     
     obj:SetScript('OnClick', self.OnClick)
+    obj:SetHandle('OnColorChanged', self.OnColorChanged)
     
     return obj
 end
@@ -49,7 +51,7 @@ function ColorBox:Update()
 end
 
 function ColorBox:OnClick()
-    GUI:ToggleMenu('ColorMenu', self, self)
+    self:ToggleMenu('ColorMenu')
 end
 
 function ColorBox:OnColorChanged(r, g, b)

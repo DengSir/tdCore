@@ -1,8 +1,5 @@
 
 local GUI = tdCore('GUI')
-
-local ColorButton = GUI('ColorButton')
-
 local ColorMenu = GUI:NewMenu('ColorMenu', GUI('Widget'):New(UIParent, true))
 
 function ColorMenu:SetColor(r, g, b)
@@ -19,9 +16,7 @@ do
         local r2, g2, b2 = caller:GetColor()
         if r1 ~= r2 or g1 ~= g2 or b1 ~= b2 then
             caller:SetColor(self:GetColor())
-            if type(caller.OnColorChanged) == 'function' then
-                caller:OnColorChanged(self:GetColor())
-            end
+            caller:RunHandle('OnColorChanged', r1, g1, b1)
         end
         ColorMenu:Hide()
     end
@@ -35,7 +30,7 @@ do
             local g = (1 / (NUMS - 1)) * (floor((cols - 1) / NUMS))
             local b = (1 / (NUMS - 1)) * ((cols - 1) % NUMS)
             
-            local colorButton = ColorButton:New(ColorMenu)
+            local colorButton = GUI('ColorButton'):New(ColorMenu)
             colorButton:SetColor(r, g, b)
             colorButton:Into(cols == NUMS * NUMS and WIDTH or 0, 0, (cols - 1) * WIDTH)
             colorButton:SetScript('OnClick', OnClick)
@@ -65,7 +60,7 @@ do
     colorSelect:GetColorValueThumbTexture():SetSize(48, 14)
     colorSelect:GetColorValueThumbTexture():SetTexCoord(0.25, 1.0, 0, 0.875)
     
-    local selectColorButton = ColorButton:New(ColorMenu)
+    local selectColorButton = GUI('ColorButton'):New(ColorMenu)
     selectColorButton:SetSize(32, 32)
     selectColorButton:SetScript('OnClick', OnClick)
     selectColorButton:Into(128, -100, nil, 0)

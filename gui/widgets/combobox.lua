@@ -63,7 +63,7 @@ function ComboBox:New(parent)
 end
 
 function ComboBox:OnClick()
-    GUI:ToggleMenu('ComboMenu', self, self, self:GetItemList())
+    self:ToggleMenu('ComboMenu', self:GetItemList())
 end
 
 function ComboBox:Update()
@@ -94,13 +94,15 @@ function ComboBox:GetItemList()
     return self.__itemList
 end
 
+---- FontComboBox
+
 local Media = GUI('Media')
 local FontComboBox = GUI:NewModule('FontComboBox', ComboBox:New())
 
 function FontComboBox:New(parent)
     local obj = self:Bind(ComboBox:New(parent))
     
-    obj:SetText('abcdef 123456 字体预览')
+    obj:SetText('ABCdef 123456 字体预览')
     obj:SetScript('OnClick', self.OnClick)
     
     return obj
@@ -119,5 +121,5 @@ function FontComboBox:Update()
 end
 
 function FontComboBox:OnClick()
-    GUI:ToggleMenu('FontMenu', self, self)
+    self:ToggleMenu('FontMenu')
 end

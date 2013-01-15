@@ -6,42 +6,16 @@ local ListWidgetItem = GUI:NewModule('ListWidgetItem', CreateFrame('CheckButton'
 ListWidgetItem:RegisterHandle('OnSetValue')
 
 local function OnClick(self, button)
-    if button == 'LeftButton' then
-        PlaySound('igMainMenuOptionCheckBoxOn')
-        if type(self.__onClick) == 'function' then
-            self:__onClick()
-        end
-        
-        local parent = self:GetParent()
-        parent:RunHandle('OnItemClick', self:GetIndex())
-        parent:SetSelected(self:GetIndex(), not parent:GetSelected(self:GetIndex()))
-    elseif button == 'RightButton' then
-        self:SetChecked(not self:GetChecked())
-        
-        --[[
-        GUI:ShowMenu('ComboMenu', self:GetParent(), 'cursor', {
-            {
-                text = ADD, onClick = function(self, index)
-                end,
-            },
-            {
-                text = L['Select All'], onClick = function(self, index)
-                    self:GetParent():GetCaller():SelectAll(true)
-                end,
-            },
-            {
-                text = L['Select None'], onClick = function(self, index)
-                    self:GetParent():GetCaller():SelectAll(false)
-                end,
-            },
-            {
-                text = L['Delete selected'], onClick = function(self, index)
-                    
-                end,
-            },
-        })
-        --]]
+    PlaySound('igMainMenuOptionCheckBoxOn')
+    if type(self.__onClick) == 'function' then
+        self:__onClick()
     end
+    
+    self:SetChecked(false)
+    
+    local parent = self:GetParent()
+    parent:RunHandle('OnItemClick', self:GetIndex())
+    parent:SetSelected(self:GetIndex(), not parent:GetSelected(self:GetIndex()))
 end
 
 local function OnDragStart(self)
@@ -137,30 +111,25 @@ function ListWidgetLinkItem:GetInfo(text)
     elseif type(text) == 'string' then
         linkType, id = text:match('^(.+):(%d+)$')
     end
-    if not linkType then
-        return text
-    end
     
     if linkType == 'item' then
-        local itemName, itemLink, itemQuality, _, _, _, _, _, _, itemTexture = GetItemInfo(id)
-        if not itemName then
+        local name, link, quality, _, _, _, _, _, _, icon = GetItemInfo(id)
+        if not name or not icon or not quality then
             self:StartUpdate(0.2)
             return
         end
         
-        local r, g, b = GetItemQualityColor(itemQuality)
-        return ('|T%s:18|t |cff%02x%02x%02x%s|r'):format(itemTexture, (r or 1) * 0xff, (g or 1) * 0xff, (b or 1) * 0xff, itemName), itemLink
+        local r, g, b = GetItemQualityColor(quality)
+        return ('|T%s:18|t |cff%02x%02x%02x%s|r'):format(icon, (r or 1) * 0xff, (g or 1) * 0xff, (b or 1) * 0xff, name), link
     elseif linkType == 'spell' then
-        return (GetSpellLink(id))
-    elseif linkType == 'quest' then
-    
-    elseif linkType == '' then
-    
-    elseif linkType == '' then
-    
-    else
-    
+        local name, _, icon = GetSpellInfo(id)
+        if not name or not icon then
+            self:StartUpdate(0.2)
+            return
+        end
+        return ('|T%s:18|t |cff71d5ff%s|r'):format(icon, name), (GetSpellLink(id))
     end
+    return text
 end
 
 function ListWidgetLinkItem:SetText(text)
@@ -170,6 +139,8 @@ function ListWidgetLinkItem:SetText(text)
     if text then
         self.__link = link
         self:GetLabelFontString():SetText(text)
+    else
+        self:GetLabelFontString():SetText('Loading ...')
     end
 end
 
