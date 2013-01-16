@@ -1,173 +1,22 @@
 
-local assert, error, pairs, type = assert, error, pairs, type
-local format, strlen = string.format, string.len
+local assert, error, ipairs, pairs = assert, error, ipairs, pairs
 local tinsert = table.insert
-local tdCore = tdCore
 
 local GUI = tdCore('GUI')
 local L = tdCore:GetLocale('tdCore')
 
+local MinimapMenu = GUI:NewMenu('MinimapMenu', GUI('Widget'):New(UIParent, true), 4)
+MinimapMenu:SetSize(100, 50)
+MinimapMenu.buttons = {}
+MinimapMenu:SetScript('OnShow', function(self)
+    self:SetWidth(#self.buttons * self.buttons[1]:GetWidth())
+end)
+
 local addons = {}
-local options = {}
 
-local OptionFrame
-OptionFrame = GUI:CreateGUI({
-    type = 'MainFrame', label = L['Taiduo\'s Addons'], allowEscape = true,
-    width = 800, height = 600, orientation = 'HORIZONTAL',
-    padding = {20, -20, -50, 50},
-    scripts = {
-        OnHide = function(self)
-            if OptionFrame.__okay then
-                OptionFrame:OnOkay()
-            else
-                OptionFrame:OnCancel()
-            end
-            OptionFrame.__okay = nil
-        end,
-    },
-    {
-        type = 'ListWidget', label = ADDONS, itemList = addons, selectMode = 'RADIO', 
-        width = 180, horizontalArgs = {180, 0, 0, 0}, name = 'AddonsList',
-        scripts = {
-            OnItemClick = function(self, index) OptionFrame:SetAddon(self:GetItemValue(index)) end,
-        }
-    },
-    {
-        type = 'Button', label = L['Profile manager'], name = 'ProfileManagerButton',
-        point = {'BOTTOMLEFT', 20, 20}, width = 130,
-        scripts = {
-            OnClick = function() OptionFrame:OnSettings() end,
-        }
-    },
-    {
-        type = 'Button', label = CANCEL,
-        point = {'BOTTOMRIGHT', -20, 20},
-        scripts = {
-            OnClick = function(self) OptionFrame:Hide() end,
-        }
-    },
-    {
-        type = 'Button', label = OKAY,
-        point = {'BOTTOMRIGHT', -125, 20},
-        scripts = {
-            OnClick = function(self)
-                OptionFrame.__okay = true
-                OptionFrame:Hide()
-            end,
-        },
-    },
-    {
-        type = 'Widget', name = 'ProfileManagerWidget',
-        {
-            type = 'ComboBox', label = L['Copy Profile'], name = 'ProfileManagerCopy',
-            scripts = {
-                OnValueChanged = function(self, value) OptionFrame:OnCopy(value) end,
-            },
-        },
-        {
-            type = 'ComboBox', label = L['Remove Profile'], name = 'ProfileManagerDelete',
-            scripts = {
-                OnValueChanged = function(self, value) OptionFrame:OnDelete(value) end,
-            },
-        },
-        {
-            type = 'Button', label = DEFAULTS, width = 150,
-            scripts = {
-                OnClick = function() OptionFrame:OnDefault() end,
-            }
-        },
-        {
-            type = 'Button', label = L['Return addon option'], width = 150,
-            scripts = {
-                OnClick = function() OptionFrame:SetAddon(OptionFrame:GetAddon():GetOption()) end
-            }
-        },
-    }
-})
+local Option = GUI('MainFrame'):New(UIParent)
 
-local function iter()
-    
-end
-
-function OptionFrame:IterateOptions()
-    return pairs(options)
-end
-
-function OptionFrame:GetAddon()
-    return self.__currentAddon
-end
-
-function OptionFrame:SetAddon(opt)
-    self:GetControl('ProfileManagerWidget'):Hide()
-    for k, obj in pairs(options) do
-        if obj == opt then
-            self:GetControl('AddonsList'):SetSelected(opt)
-            self.__currentAddon = obj:GetAddon()
-            if obj:GetAddon():GetProfile() then
-                self:GetControl('ProfileManagerButton'):Enable()
-            else
-                self:GetControl('ProfileManagerButton'):Disable()
-            end
-            obj:Show()
-        else
-            obj:Hide()
-        end
-    end
-end
-
-function OptionFrame:OnOkay()
-    for _, obj in pairs(options) do
-        local db = obj:GetDB()
-        if db then
-            db:RemoveBackupProfile()
-        end
-    end
-end
-
-function OptionFrame:OnCancel()
-    local unsave = false
-    for _, obj in pairs(options) do
-        local db = obj:GetDB()
-        if db and db:IsProfileChanged() then
-            unsave = true
-            break
-        end
-    end
-    if not unsave then return end
-    
-    self:ShowDialog(
-        'Dialog',
-        L['You change the configuration of some addons, you want to save ?'],
-        GUI.DialogIcon.Warning, 
-        function()
-            for _, obj in pairs(options) do
-                local db = obj:GetDB()
-                if db then
-                    db:RemoveBackupProfile()
-                end
-            end
-        end,
-        function()
-            for _, obj in pairs(options) do
-                local db = obj:GetDB()
-                if db and db:IsProfileChanged() then
-                    db:RestoreCurrentProfile()
-                    obj:GetAddon():UpdateProfile()
-                end
-            end
-        end
-    )
-end
-
-function OptionFrame:OnSettings()
-    local addon = self:GetAddon()
-    if not addon then return end
-    
-    self:GetAddon():GetOption():Hide()
-    self:GetControl('ProfileManagerWidget'):Show()
-end
-
-function OptionFrame:OnDefault()
+function Option:OnDefault()
     local addon = self:GetAddon()
     if not addon then return end
     
@@ -187,7 +36,7 @@ function OptionFrame:OnDefault()
     )
 end
 
-function OptionFrame:OnCopy(key)
+function Option:OnCopyProfile(key)
     local addon = self:GetAddon()
     if not addon then return end
     
@@ -199,12 +48,12 @@ function OptionFrame:OnCopy(key)
             addon:GetDB():CopyProfile(key)
             addon:GetDB():BackupCurrentProfile()
             addon:UpdateProfile()
-            self:GetControl('ProfileManagerWidget'):Update()
+            self.profileWidget:Update()
         end
     )
 end
 
-function OptionFrame:OnDelete(key)
+function Option:OnDeleteProfile(key)
     local addon = self:GetAddon()
     if not addon then return end
     
@@ -214,9 +63,83 @@ function OptionFrame:OnDelete(key)
         GUI.DialogIcon.Warning,
         function()
             addon:GetDB():DeleteProfile(key)
-            self:GetControl('ProfileManagerWidget'):Update()
+            self.profileWidget:Update()
         end
     )
+end
+
+function Option:OnAccept()
+    for _, v in ipairs(addons) do
+        local db = v.value:GetDB()
+        if db then
+            db:RemoveBackupProfile()
+        end
+    end
+end
+
+function Option:OnCancel()
+    if not self:IsProfileUnSave() then
+        return self:OnAccept()
+    end
+    
+    self:ShowDialog(
+        'Dialog',
+        L['You change the configuration of some addons, you want to save ?'],
+        GUI.DialogIcon.Warning,
+        function()
+            self:OnAccept()
+        end,
+        function()
+            for _, v in pairs(addons) do
+                local db = v.value:GetDB()
+                if db and db:IsProfileChanged() then
+                    db:RestoreCurrentProfile()
+                    v.value:UpdateProfile()
+                end
+            end
+        end
+    )
+end
+
+function Option:OnSettings()
+    local addon = self:GetAddon()
+    
+    addon:GetOption():Hide()
+    self.profileWidget:Show()
+end
+
+function Option:IsProfileUnSave()
+    for _, v in ipairs(addons) do
+        local db = v.value:GetDB()
+        if db and db:IsProfileChanged() then
+            return true
+        end
+    end
+    return false
+end
+
+function Option:SetAddon(addon)
+    self.profileWidget:Hide()
+    
+    for _, v in ipairs(addons) do
+        if v.value == addon then
+            self.currAddon = addon
+            
+            if addon:GetProfile() then
+                self.profileButton:Enable()
+            else
+                self.profileButton:Disable()
+            end
+            self.addonList:SetSelected(addon)
+            v.value:GetOption():Show()
+        else
+            v.value:GetOption():Hide()
+        end
+    end
+end
+
+function Option:GetAddon()
+    return self.currAddon
 end
 
 local function OptionOnShow(self)
@@ -236,46 +159,167 @@ local function OptionGetDB(self)
     return self.__addon and self.__addon:GetDB()
 end
 
-local Addon = tdCore.Addon
-
-function Addon:InitOption(gui, title)
-    assert(type(gui) == 'table', 'Bad argument #1 to `InitOption\' (string expected)')
-    
+function Option:Add(gui, title, addon)
     local obj = GUI:CreateGUI(gui)
-    
-    self.__option = obj
-    obj.__addon = self
     
     obj.GetAddon = OptionGetAddon
     obj.GetDB = OptionGetDB
     
+    obj.__addon = addon
+    obj:Hide()
+    obj:SetParent(Option)
     obj:HookScript('OnShow', OptionOnShow)
-    obj:SetParent(OptionFrame)
-    
     obj:ClearAllPoints()
-    
     if obj:IsWidgetType('Widget') then
         obj:SetPoint('BOTTOMRIGHT', -20, 50)
-        obj:SetPoint('TOPLEFT', OptionFrame:GetControl('AddonsList'), 'TOPRIGHT', 10, 0)
+        obj:SetPoint('TOPLEFT', Option.addonList, 'TOPRIGHT', 10, 0)
     elseif obj:IsWidgetType('TabWidget') then
         obj:SetPoint('BOTTOMRIGHT', -19, 49)
-        obj:SetPoint('TOPLEFT', OptionFrame:GetControl('AddonsList'), 'TOPRIGHT', 9, 22)
+        obj:SetPoint('TOPLEFT', Option.addonList, 'TOPRIGHT', 9, 22)
     else
         error('error obj type ' .. obj:GetWidgetType())
     end
     
-    title = title or self:GetTitle()
+    tinsert(addons, {text = title, value = addon})
+    
+    return obj
+end
 
-    tinsert(addons, {text = title, value = obj})
-    options[title] = obj
+---- Option
+
+do
+    Option:Hide()
+    Option:SetSize(800, 600)
+    Option:SetChildOrientation('HORIZONTAL')
+    Option:SetAllowEscape(true)
+    Option:SetPadding(20, -20, -50, 50)
+    Option:SetLabelText(L['Taiduo\'s Addons'])
+    Option:HookScript('OnHide', function(self)
+        if self.__accept then
+            self:OnAccept()
+        else
+            self:OnCancel()
+        end
+    end)
+    
+    local addonList = GUI('ListWidget'):New(Option)
+    addonList:SetWidth(180)
+    addonList:SetLabelText(ADDONS)
+    addonList:SetItemList(addons)
+    addonList:SetSelectMode('RADIO')
+    addonList:SetHorizontalArgs(180, 0, 0, 0)
+    addonList:SetHandle('OnItemClick', function(self, index)
+        Option:SetAddon(self:GetItemValue(index))
+    end)
+    addonList:Into()
+    
+    local profileButton = GUI('Button'):New(Option)
+    profileButton:SetWidth(130)
+    profileButton:SetText(L['Profile manager'])
+    profileButton:SetPoint('BOTTOMLEFT', 20, 20)
+    profileButton:SetScript('OnClick', function()
+        Option:OnSettings()
+    end)
+    
+    local cancelButton = GUI('Button'):New(Option)
+    cancelButton:SetText(CANCEL)
+    cancelButton:SetPoint('BOTTOMRIGHT', -20, 20)
+    cancelButton:SetScript('OnClick', function()
+        Option:Hide()
+    end)
+    
+    local acceptButton = GUI('Button'):New(Option)
+    acceptButton:SetText(OKAY)
+    acceptButton:SetPoint('RIGHT', cancelButton, 'LEFT', -5, 0)
+    acceptButton:SetScript('OnClick', function()
+        Option.__accept = true
+        Option:Hide()
+    end)
+    
+    local profileWidget = GUI('Widget'):New(Option)
+    profileWidget:SetPoint('BOTTOMRIGHT', -20, 50)
+    profileWidget:SetPoint('TOPLEFT', addonList, 'TOPRIGHT', 10, 0)
+    
+    function profileWidget:Update()
+        self:SetLabelText(Option:GetAddon():GetTitle() .. ' - ' .. L['Profile manager'])
+        
+        local list = Option:GetAddon():GetDB():GetProfileList()
+        
+        Option.copyComboBox:SetItemList(list)
+        Option.deleteComboBox:SetItemList(list)
+    end
+    
+    profileWidget:SetScript('OnShow', profileWidget.Update)
+    
+    local copyComboBox = GUI('ComboBox'):New(profileWidget)
+    copyComboBox:SetLabelText(L['Copy Profile'])
+    copyComboBox:SetValueText(L['Please choose profile ...'])
+    copyComboBox:GetValueFontString():SetPoint('LEFT', 10, 0)
+    copyComboBox:SetHandle('OnValueChanged', function(self, value)
+        Option:OnCopyProfile(value)
+    end)
+    copyComboBox:Into()
+    
+    local deleteComboBox = GUI('ComboBox'):New(profileWidget)
+    deleteComboBox:SetLabelText(L['Remove Profile'])
+    deleteComboBox:SetValueText(L['Please choose profile ...'])
+    deleteComboBox:GetValueFontString():SetPoint('LEFT', 10, 0)
+    deleteComboBox:SetHandle('OnValueChanged', function(self, value)
+        Option:OnDeleteProfile(value)
+    end)
+    deleteComboBox:Into()
+    
+    local defaultButton = GUI('Button'):New(profileWidget)
+    defaultButton:SetWidth(150)
+    defaultButton:SetText(DEFAULTS)
+    defaultButton:SetScript('OnClick', function()
+        Option:OnDefault()
+    end)
+    defaultButton:Into()
+    
+    local returnButton = GUI('Button'):New(profileWidget)
+    returnButton:SetWidth(150)
+    returnButton:SetText(L['Return addon option'])
+    returnButton:SetScript('OnClick', function()
+        Option:SetAddon(Option:GetAddon())
+    end)
+    returnButton:Into()
+    
+    Option.addonList = addonList
+    Option.profileButton = profileButton
+    Option.copyComboBox = copyComboBox
+    Option.deleteComboBox = deleteComboBox
+    Option.profileWidget = profileWidget
+end
+
+---- Addon
+
+local Addon = tdCore.Addon
+
+function Addon:InitMinimap(args, isparent)
+    assert(type(args) == 'table', 'Bad argument #1 to `InitMinimap\' (table expected)')
+    
+    args.type = 'MinimapButton'
+--    args.profile = {self:GetName(), 'minimapangle'}
+--    args.angle = self:GetProfile() and self:GetProfile().minimapangle or args.angle
+    args.verticalArgs = {40, 0, 0}
+    
+    self.__minimap = GUI:CreateGUI(args, isparent and Minimap or MinimapMenu, false)
+    tinsert(MinimapMenu.buttons, self.__minimap)
+end
+
+function Addon:GetMinimap()
+    return self.__minimap
+end
+
+function Addon:InitOption(gui, title)
+    assert(type(gui) == 'table', 'Bad argument #1 to `InitOption\' (string expected)')
+    
+    self.__option = Option:Add(gui, title or self:GetTitle(), self)
 end
 
 function Addon:GetOptionControl(name)
     return self:GetOption():GetControl(name)
-end
-
-function Addon:IsOptionOpened()
-    return self:GetOption():IsVisible()
 end
 
 function Addon:GetOption()
@@ -283,11 +327,11 @@ function Addon:GetOption()
 end
 
 function Addon:ToggleOption()
-    if self:IsOptionOpened() then
-        OptionFrame:Hide()
+    if self:GetOption():IsVisible() then
+        Option:Hide()
     else
-        OptionFrame:SetAddon(self:GetOption())
-        OptionFrame:Show()
+        Option:SetAddon(self)
+        Option:Show()
     end
 end
 
@@ -298,33 +342,30 @@ end
 GUI:RegisterCmd('/td', '/taiduo', '/taiduooption', '/tdoption')
 GUI:SetHandle('OnSlashCmd', GUI.ToggleOption)
 GUI:InitOption({
-    type = 'Widget', label = L['About'], name = 'AboutWidget',
+    type = 'TabWidget',
+    {
+        type = 'Widget', label = L['About'], name = 'AboutWidget',
+    },
+    {
+        type = 'Widget', label = L['Config'],
+        {
+            type = 'CheckBox', label = L['Hide minimap button'],
+        },
+    },
 }, L['About'])
 
-do
-    local widget = OptionFrame:GetControl('ProfileManagerWidget')
-    widget:SetPoint('BOTTOMRIGHT', -20, 50)
-    widget:SetPoint('TOPLEFT', OptionFrame:GetControl('AddonsList'), 'TOPRIGHT', 10, 0)
-    
-    local combobox = OptionFrame:GetControl('ProfileManagerCopy')
-    combobox:SetValueText(L['Please choose profile ...'])
-    combobox:GetValueFontString():SetPoint('LEFT', 10, 0)
-    
-    local combobox =  OptionFrame:GetControl('ProfileManagerDelete')
-    combobox:SetValueText(L['Please choose profile ...'])
-    combobox:GetValueFontString():SetPoint('LEFT', 10, 0)
-    
-    function widget:Update()
-        self:SetLabelText(OptionFrame:GetAddon():GetTitle() .. ' - ' .. L['Profile manager'])
-        
-        local list = OptionFrame:GetAddon():GetDB():GetProfileList()
-        
-        OptionFrame:GetControl('ProfileManagerCopy'):SetItemList(list)
-        OptionFrame:GetControl('ProfileManagerDelete'):SetItemList(list)
-    end
-    
-    widget:SetScript('OnShow', widget.Update)
-end
+GUI:InitMinimap({
+    note = {L['Taiduo\'s Addons']}, itemList = addons, angle = 0,
+    scripts = {
+        OnCall = function()
+            GUI:ToggleMenu(GUI:GetMinimap(), 'MinimapMenu')
+        end,
+        OnMenu = function(self, addon)
+            addon:ToggleOption()
+        end,
+    }
+}, true)
+
 
 do
     local widget = GUI:GetOptionControl('AboutWidget')
@@ -341,12 +382,12 @@ do
             self:SetText(self.text)
         end
         if self:HasFocus() then
-            self:HighlightText(0, strlen(self.text))
+            self:HighlightText(0, self.text:len())
         end
     end
 
     local function OnEditFocusGained(self)
-        self:HighlightText(0, strlen(self.text))
+        self:HighlightText(0, self.text:len())
     end
 
     local function OnEditFocusLost(self)
@@ -402,7 +443,7 @@ do
     CreateLabel(L['Tencent Weibo:'],    'GameFontNormalSmall', 'TOPLEFT', 50, -300)
     CreateLabel(L['Sina Weibo:'],       'GameFontNormalSmall', 'TOPLEFT', 50, -350)
     
-    CreateLabel(GetAddOnInfo('tdCore'),                 'GameFontHighlightSmall', 'TOPLEFT', 200, -50)
+    CreateLabel(L['Taiduo\'s Addons'],                  'GameFontHighlightSmall', 'TOPLEFT', 200, -50)
     CreateLabel(GetAddOnMetadata('tdCore', 'Version'),  'GameFontHighlightSmall', 'TOPLEFT', 200, -100)
     CreateLabel(GetAddOnMetadata('tdCore', 'Author'),   'GameFontHighlightSmall', 'TOPLEFT', 200, -150)
     CreateEditbox('ldz5@qq.com',                    'TOPLEFT', 192, -200)

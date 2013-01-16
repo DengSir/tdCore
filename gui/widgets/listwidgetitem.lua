@@ -46,7 +46,6 @@ function ListWidgetItem:New(parent)
         obj:SetScript('OnClick', OnClick)
         
         if parent:GetAllowOrder() then
-            obj:SetToplevel(true)
             obj:RegisterForDrag('LeftButton')
             
             obj:SetScript('OnDragStart', OnDragStart)
@@ -79,15 +78,18 @@ end
 ---- ListWidgetLinkItem
 
 local ListWidgetLinkItem = GUI:NewModule('ListWidgetLinkItem', ListWidgetItem:New(), 'Update')
+ListWidgetLinkItem:RegisterHandle('OnNote')
 
 function ListWidgetLinkItem:New(parent)
     local obj = self:Bind(ListWidgetItem:New(parent))
     if parent then
         obj:SetAllowEnter(true)
+        obj:SetHandle('OnNote', self.OnNote)
     end
     return obj
 end
 
+--[[
 local linktypes = {
     item = true,
     enchant = true,
@@ -99,6 +101,7 @@ local linktypes = {
     glyph = true,
     instancelock = true
 }
+--]]
 
 function ListWidgetLinkItem:OnUpdate()
     self:SetText(self.__text)
@@ -120,14 +123,17 @@ function ListWidgetLinkItem:GetInfo(text)
         end
         
         local r, g, b = GetItemQualityColor(quality)
-        return ('|T%s:18|t |cff%02x%02x%02x%s|r'):format(icon, (r or 1) * 0xff, (g or 1) * 0xff, (b or 1) * 0xff, name), link
+        return ('|T%s:16|t |cff%02x%02x%02x%s|r'):format(icon, (r or 1) * 0xff, (g or 1) * 0xff, (b or 1) * 0xff, name), link
     elseif linkType == 'spell' then
         local name, _, icon = GetSpellInfo(id)
         if not name or not icon then
             self:StartUpdate(0.2)
             return
         end
-        return ('|T%s:18|t |cff71d5ff%s|r'):format(icon, name), (GetSpellLink(id))
+        return ('|T%s:16|t |cff71d5ff%s|r'):format(icon, name), (GetSpellLink(id))
+    elseif linkType == 'currency' then
+        local name, _, icon = GetCurrencyInfo(id)
+        return ('|TInterface\\Icons\\%s:16|t |cff00aa00%s|r'):format(icon, name), (GetCurrencyLink(id))
     end
     return text
 end
@@ -144,7 +150,7 @@ function ListWidgetLinkItem:SetText(text)
     end
 end
 
-function ListWidgetLinkItem:OnEnter()
+function ListWidgetLinkItem:OnNote()
     if self.__link then
         GameTooltip:SetHyperlink(self.__link)
     end

@@ -2,22 +2,24 @@
 local GUI = tdCore('GUI')
 
 local MinimapButton = GUI:NewModule('MinimapButton', CreateFrame('Button'), 'UIObject', 'Control', 'Update')
+MinimapButton:RegisterHandle('OnCall', 'OnMenu')
 
-function MinimapButton:New()
-    local obj = self:Bind(CreateFrame('Button', nil, Minimap))
+function MinimapButton:New(parent)
+    local obj = self:Bind(CreateFrame('Button', nil, parent))
     
     obj:SetMovable(true)
     obj:RegisterForDrag('LeftButton')
+    obj:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
     obj:SetFrameStrata('DIALOG')
     obj:SetSize(32, 32)
     obj:SetScript('OnDragStart', self.OnDragStart)
     obj:SetScript('OnDragStop', self.OnDragStop)
     obj:SetScript('OnShow', self.Update)
+    obj:SetScript('OnClick', self.OnClick)
     
     obj:SetHighlightTexture([[Interface\Minimap\UI-Minimap-ZoomButton-Highlight]])
     
     local t = obj:CreateTexture(nil, 'BACKGROUND')
-    t:SetTexCoord(0.09375, 0.90625, 0.46875, 0.89375)
     t:SetSize(20, 20)
     t:SetPoint('CENTER', -1, 1)
     self.__icon = t
@@ -28,6 +30,24 @@ function MinimapButton:New()
     t:SetPoint('TOPLEFT')
     
     return obj
+end
+
+function MinimapButton:OnClick(button)
+    if button == 'LeftButton' then
+        self:RunHandle('OnCall')
+    elseif button == 'RightButton' then
+        if self:GetItemList() then
+            self:ToggleMenu('ComboMenu', self:GetItemList())
+        end
+    end
+end
+
+function MinimapButton:SetItemList(list)
+    self.__itemList = list
+end
+
+function MinimapButton:GetItemList()
+    return self.__itemList
 end
 
 function MinimapButton:SetAngle(angle)
@@ -69,4 +89,8 @@ end
 
 function MinimapButton:SetIcon(texture)
     self.__icon:SetTexture(texture)
+end
+
+function MinimapButton:SetValue(value)
+    self:RunHandle('OnMenu', value)
 end

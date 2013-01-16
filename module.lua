@@ -52,10 +52,9 @@ local Embeds = {
     }
 }
 
-local function Embed(self, obj, ...)
+function Addon:Embed(obj, ...)
     for i = 1, select('#', ...) do
-        local name = select(i, ...)
-        local embed = self.__embeds and self.__embeds[name] or Embeds[name]
+        local embed = self:GetEmbed(select(i, ...))
         
         if type(embed) == 'function' then
             embed(obj)
@@ -67,6 +66,10 @@ local function Embed(self, obj, ...)
     end
 end
 
+function Addon:GetEmbed(name)
+    return self.__embeds and self.__embeds[name] or Embeds[name] or name
+end
+
 function Addon:NewModule(name, obj, ...)
     assert(type(name) == 'string', 'Bad argument #1 to `NewModule\' (string expected)')
     if not self.__modules[name] then
@@ -74,7 +77,7 @@ function Addon:NewModule(name, obj, ...)
         obj.__tdaddon = self
         obj:RegisterHandle('OnProfileUpdate')
         
-        Embed(self, obj, 'BaseEmbed', ...)
+        self:Embed(obj, 'BaseEmbed', ...)
         self.__modules[name] = obj
         
         if obj.Hide and type(obj.Hide) == 'function' then obj:Hide() end

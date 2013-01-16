@@ -1,4 +1,6 @@
 
+local ipairs, tinsert, type = ipairs, table.insert, type
+
 local GUI = tdCore('GUI')
 
 local ICON_SIZE, DIALOG_PADDING = 64, 10
@@ -179,7 +181,7 @@ function Dialog:GetDialogClass(name)
     end
 end
 
-function GUI:ShowDialog(name, caller, text, ...)
+function GUI:ShowDialog(caller, name, text, ...)
     if Dialog:GetDialog(name, caller) then
         return
     end

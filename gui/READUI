@@ -44,6 +44,7 @@ GUI table arguments:
         itemHeight      [number]
         itemList        [table]
         itemObject      [object]
+        listObject      [object]
         itemSpacing     [number]
         maxCount        [number]    
         allowOrder      [boolean]

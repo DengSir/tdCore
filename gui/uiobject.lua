@@ -146,19 +146,32 @@ function UIObject:OnDisable()
 end
 
 local function OnEnter(self)
-    if self.OnEnter or self.__note then
-        if self:GetRight() > (GetScreenWidth() / 2) then
-            GameTooltip:SetOwner(self, 'ANCHOR_LEFT')
-        else
-            GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
-        end
-        if type(self.OnEnter) == 'function' then
-            self:OnEnter()
-        else
-            GameTooltip:SetText(self.__note)
-        end
-        GameTooltip:Show()
+    if not (self:GetHandle('OnNote') or self.__note) then
+        return
     end
+    
+    GameTooltip:SetOwner(self, self:GetRight() > (GetScreenWidth() / 2) and 'ANCHOR_LEFT' or 'ANCHOR_RIGHT')
+    
+    if self:GetHandle('OnNote') then
+        self:RunHandle('OnNote')
+    else
+        if type(self.__note) == 'string' then
+            GameTooltip:SetText(self.__note)
+        elseif type(self.__note) == 'table' then
+            local hasText
+            for i, t in ipairs(self.__note) do
+                if type(t) == 'string' then
+                    if hasText then
+                        GameTooltip:AddLine(t, 1, 1, 1)
+                    else
+                        GameTooltip:SetText(t)
+                        hasText = true
+                    end
+                end
+            end
+        end
+    end
+    GameTooltip:Show()
 end
 
 local function OnLeave(self)
@@ -187,11 +200,11 @@ function UIObject:SetPoints(...)
 end
 
 function UIObject:ToggleMenu(menu, ...)
-    GUI:ToggleMenu(menu, self, ...)
+    GUI:ToggleMenu(self, menu, ...)
 end
 
 function UIObject:ShowDialog(name, text, ...)
-    GUI:ShowDialog(name, self, text, ...)
+    GUI:ShowDialog(self, name, text, ...)
 end
 
 tdCore('GUI'):RegisterEmbed('UIObject', UIObject)

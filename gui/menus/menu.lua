@@ -20,6 +20,7 @@ function Menu:New(name, obj, holdTime)
     
     obj:SetFrameStrata('DIALOG')
     obj:SetBackdropColor(0, 0, 0, 0.9)
+    obj:SetClampedToScreen(true)
     
     menus[name] = obj
     
@@ -49,7 +50,7 @@ function Menu:OnUpdate(elapsed)
         return
     end
     
-    self.__hideTimer = self.__hideTimer - elapsed
+    self.__hideTimer = (self.__hideTimer or self:GetHoldTime()) - elapsed
     if self.__hideTimer < 0 then
         self:Hide()
     end
@@ -104,7 +105,7 @@ function Menu:GetMenu(name)
     return menus[name]
 end
 
-function Menu:ToggleMenu(name, caller, ...)
+function Menu:ToggleMenu(caller, name, ...)
     local menu = self:GetMenu(name)
     if not menu then
         error('menu error')
@@ -115,8 +116,8 @@ end
 
 local GUI = tdCore('GUI')
 
-function GUI:ToggleMenu(name, caller, ...)
-    Menu:ToggleMenu(name, caller, ...)
+function GUI:ToggleMenu(caller, name, ...)
+    Menu:ToggleMenu(caller, name, ...)
 end
 
 function GUI:NewMenu(name, obj, holdTime)
