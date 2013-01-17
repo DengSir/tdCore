@@ -109,7 +109,7 @@ function GUI:CreateGUI(data, parent, uiparent)
     if type(data.scripts) == 'table' then
         for script, func in pairs(data.scripts) do
             if obj:HasScript(script) then
-                obj:SetScript(script, func)
+                obj:HookScript(script, func)
             elseif obj:HasHandle(script) then
                 obj:SetHandle(script, func)
             end

@@ -2,5 +2,6 @@
 ## Title: tdCore
 ## Author: ldz5
 ## Version: 50100.05
+## SavedVariables: TDDB_TDCORE
 
 load.xml

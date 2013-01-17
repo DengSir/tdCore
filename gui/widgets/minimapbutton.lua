@@ -11,9 +11,9 @@ function MinimapButton:New(parent)
     obj:SetMovable(true)
     obj:RegisterForDrag('LeftButton')
     obj:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-    obj:SetFrameStrata('DIALOG')
     obj:SetSize(32, 32)
     obj:SetScript('OnClick', self.OnClick)
+    obj:SetFrameLevel(Minimap:GetFrameLevel() + 5)
     
     obj:SetHighlightTexture([[Interface\Minimap\UI-Minimap-ZoomButton-Highlight]])
     

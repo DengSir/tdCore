@@ -10,16 +10,15 @@ function Option:New(gui, addon, title)
     local obj = self:Bind{}
     
     obj.__addon = addon
-    obj.__title = title
     obj.__frame = GUI:CreateGUI(gui)
     
-    tdOption('Frame'):AddOption(obj)
+    tdOption('Frame'):AddOption(obj, title)
     
     return obj
 end
 
 function Option:GetTitle()
-    return self.__title or self:GetAddon():GetTitle()
+    return self:GetAddon():GetTitle()
 end
 
 function Option:GetAddon()
