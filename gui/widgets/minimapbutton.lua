@@ -1,5 +1,6 @@
 
 local GUI = tdCore('GUI')
+local Minimap = Minimap
 
 local MinimapButton = GUI:NewModule('MinimapButton', CreateFrame('Button'), 'UIObject', 'Control', 'Update')
 MinimapButton:RegisterHandle('OnCall', 'OnMenu')
@@ -12,9 +13,6 @@ function MinimapButton:New(parent)
     obj:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
     obj:SetFrameStrata('DIALOG')
     obj:SetSize(32, 32)
-    obj:SetScript('OnDragStart', self.OnDragStart)
-    obj:SetScript('OnDragStop', self.OnDragStop)
-    obj:SetScript('OnShow', self.Update)
     obj:SetScript('OnClick', self.OnClick)
     
     obj:SetHighlightTexture([[Interface\Minimap\UI-Minimap-ZoomButton-Highlight]])
@@ -93,4 +91,16 @@ end
 
 function MinimapButton:SetValue(value)
     self:RunHandle('OnMenu', value)
+end
+
+function MinimapButton:SetAllowGroup(allow)
+    if allow then
+        self:SetScript('OnShow', nil)
+        self:SetScript('OnDragStart', nil)
+        self:SetScript('OnDragStop', nil)
+    else
+        self:SetScript('OnShow', self.Update)
+        self:SetScript('OnDragStart', self.OnDragStart)
+        self:SetScript('OnDragStop', self.OnDragStop)
+    end
 end

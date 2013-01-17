@@ -11,5 +11,6 @@
     <Script file="locale\zhTW.lua"/>
     
     <Include file="gui\gui.xml"/>
-    <Script file="option.lua"/>
+    <Include file="option\option.xml"/>
+    <!--Script file="option.lua"/-->
 </Ui>
