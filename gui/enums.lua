@@ -15,4 +15,7 @@ GUI.ListButton = {
     Delete = 'Delete',
     SelectAll = 'SelectAll',
     SelectNone = 'SelectNone',
+    Custom1 = 'Custom1',
+    Custom2 = 'Custom2',
+    Custom3 = 'Custom3',
 }

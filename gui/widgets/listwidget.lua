@@ -6,7 +6,7 @@ local LIST_SPACING = 5
 local EXTRA_BUTTON_SIZE = 24
 
 local ListWidget = GUI:NewModule('ListWidget', CreateFrame('Frame'), 'UIObject', 'View', 'Control', 'Update')
-ListWidget:RegisterHandle('OnItemClick', 'OnAdd', 'OnDelete', 'OnSelectAll', 'OnSelectNone')
+ListWidget:RegisterHandle('OnItemClick', 'OnAdd', 'OnDelete', 'OnSelectAll', 'OnSelectNone', 'OnCustom1', 'OnCustom2', 'OnCustom3')
 
 function ListWidget:GetWheelStep()
     return self:GetMaxCount() - 1
@@ -151,9 +151,9 @@ function ListWidget:GetSelectMode()
     return self.__selectMode or 'NONE'
 end
 
-function ListWidget:CreateExtraButton(index, type)
+function ListWidget:CreateExtraButton(index, args)
     if not self.__extraButtons[index] then
-        self.__extraButtons[index] = GUI('ListWidgetButton'):New(self, type)
+        self.__extraButtons[index] = GUI('ListWidgetButton'):New(self, args)
         self.__extraButtons[index]:SetSize(EXTRA_BUTTON_SIZE, EXTRA_BUTTON_SIZE)
     end
     return self.__extraButtons[index]
@@ -165,8 +165,8 @@ end
 
 function ListWidget:SetExtraButton(list)
     self.__extraButtons = self.__extraButtons or {}
-    for i, type in ipairs(list) do
-        local button = self:CreateExtraButton(i, type)
+    for i, v in ipairs(list) do
+        local button = self:CreateExtraButton(i, v)
         
         button:ClearAllPoints()
         if i == 1 then
