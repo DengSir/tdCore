@@ -2,17 +2,24 @@
 local tdOption = tdCore(...)
 local GUI = tdCore('GUI')
 
-local MinimapGroup = tdOption:NewModule('MinimapGroup', GUI('Widget'):New(UIParent, true))
-GUI:NewMenu('MinimapMenu', MinimapGroup, 10, true)
-MinimapGroup.buttons = {}
-MinimapGroup:SetSize(32, 32)
-MinimapGroup:SetBackdrop(nil)
-MinimapGroup:SetFrameStrata('HIGH')
-MinimapGroup:HookScript('OnShow', function(self)
-    self:SetWidth((#self.buttons - 1) * 32)
+local MinimapMenu = tdOption:NewModule('MinimapMenu', GUI('Widget'):New(UIParent, true))
+
+GUI:NewMenu('MinimapMenu', MinimapMenu, 10, true)
+
+MinimapMenu.buttons = {}
+MinimapMenu:SetSize(32, 32)
+MinimapMenu:SetBackdrop(nil)
+MinimapMenu:SetFrameStrata('HIGH')
+MinimapMenu:HookScript('OnShow', function(self)
+    local orientation = tdOption:GetProfile().minimapOrientation
+    if orientation == 'LEFT' or orientation == 'RIGHT' then
+        self:SetSize((#self.buttons - 1) * 32, 32)
+    else
+        self:SetSize(32, (#self.buttons - 1) * 32)
+    end
 end)
 
-function MinimapGroup:GetPositionArgs()
+function MinimapMenu:GetPositionArgs()
     local orientation = tdOption:GetProfile().minimapOrientation
     if orientation == 'LEFT' then
         return 'RIGHT', self:GetCaller(), 'LEFT'
@@ -25,7 +32,7 @@ function MinimapGroup:GetPositionArgs()
     end
 end
 
-function MinimapGroup:Add(args, addon)
+function MinimapMenu:Add(args, addon)
     args.type = 'MinimapButton'
     args.profile = {addon:GetName(), 'minimapAngle'}
     args.angle = addon:GetProfile() and addon:GetProfile().minimapAngle or args.angle or 0
@@ -38,7 +45,7 @@ function MinimapGroup:Add(args, addon)
     return button
 end
 
-function MinimapGroup:SetAllowGroup(allow)
+function MinimapMenu:SetAllowGroup(allow)
     for i, button in ipairs(self.buttons) do
         if i == 1 then
             button:SetAllowGroup(false)
@@ -62,7 +69,7 @@ function MinimapGroup:SetAllowGroup(allow)
     end
 end
 
-function MinimapGroup:GetAllowGroup()
+function MinimapMenu:GetAllowGroup()
     if tdOption:GetProfile() then
         return tdOption:GetProfile().minimapGroup
     else
@@ -70,11 +77,11 @@ function MinimapGroup:GetAllowGroup()
     end
 end
 
-function MinimapGroup:OnProfileUpdate()
+function MinimapMenu:OnProfileUpdate()
     self:SetAllowGroup(self:GetAllowGroup())
 end
 
-function MinimapGroup:OnInit()
+function MinimapMenu:OnInit()
     self:SetAllowGroup(tdOption:GetProfile().minimapGroup)
     self:SetHandle('OnProfileUpdate', self.OnProfileUpdate)
 end

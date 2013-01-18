@@ -22,7 +22,7 @@ function Addon:GetOption()
 end
 
 function Addon:InitMinimap(args)
-    self.__minimap = tdOption('MinimapGroup'):Add(args, self)
+    self.__minimap = tdOption('MinimapMenu'):Add(args, self)
 end
 
 function Addon:GetMinimap()
@@ -69,7 +69,7 @@ function tdOption:OnInit()
                 option:GetAddon():ToggleOption()
             end,
             OnEnter = function(self)
-                tdOption('MinimapGroup'):Hide()
+                tdOption('MinimapMenu'):Hide()
                 self:ToggleMenu('MinimapMenu')
             end,
         }
