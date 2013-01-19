@@ -13,7 +13,7 @@ function MinimapButton:New(parent)
     obj:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
     obj:SetSize(32, 32)
     obj:SetScript('OnClick', self.OnClick)
-    obj:SetFrameLevel(Minimap:GetFrameLevel() + 5)
+    obj:SetFrameLevel(Minimap:GetFrameLevel() + 10)
     
     obj:SetHighlightTexture([[Interface\Minimap\UI-Minimap-ZoomButton-Highlight]])
     
@@ -71,12 +71,14 @@ function MinimapButton:OnDragStart()
     if IsShiftKeyDown() then
         self:StartUpdate()
         self:StartMoving()
+        self:SetScript('OnDragStop', self.OnDragStop)
     end
 end
 
 function MinimapButton:OnDragStop()
     self:StopUpdate()
     self:StopMovingOrSizing()
+    self:SetScript('OnDragStop', nil)
     
     self:SetProfileValue(self:GetAngle())
 end
@@ -95,12 +97,10 @@ end
 
 function MinimapButton:SetAllowGroup(allow)
     if allow then
-        self:SetScript('OnShow', nil)
+        -- self:SetScript('OnShow', nil)
         self:SetScript('OnDragStart', nil)
-        self:SetScript('OnDragStop', nil)
     else
-        self:SetScript('OnShow', self.Update)
+        -- self:SetScript('OnShow', self.Update)
         self:SetScript('OnDragStart', self.OnDragStart)
-        self:SetScript('OnDragStop', self.OnDragStop)
     end
 end

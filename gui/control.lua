@@ -34,7 +34,11 @@ local function getProfile(name)
     end
     
     local addon = tdCore:GetAddon(name)
-    return addon and addon:GetProfile() or _G[name]
+    if addon then
+        return addon:GetProfile()
+    else
+        return _G[name]
+    end
 end
 
 local Control = {}

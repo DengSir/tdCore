@@ -1,4 +1,5 @@
 
+local GUI = tdCore('GUI')
 local tdOption = tdCore:NewAddon(...)
 local L = tdCore:GetLocale('tdCore')
 
@@ -21,41 +22,58 @@ function Addon:GetOption()
     return self.__option
 end
 
-function Addon:InitMinimap(args)
-    self.__minimap = tdOption('MinimapMenu'):Add(args, self)
+function Addon:InitMinimap(args, isparent)
+    args.type = 'MinimapButton'
+    args.profile = {tdOption:GetName(), 'minimapAngles', self:GetName()}
+    
+    local button = GUI:CreateGUI(args, Minimap, false)
+    button.__addon = self
+    self.__minimap = button
+    
+    if isparent then
+        button:SetAllowGroup(false)
+        button:SetParent(Minimap)
+        button:Update()
+    else
+        tdOption('MinimapMenu'):Add(button)
+    end
+    
+    local widget = tdOption:GetOption() and tdOption:GetOption():GetControl('MinimapGroupWidget')
+    if widget then
+        local enableCheckBox = GUI('CheckBox'):New(widget)
+        enableCheckBox:SetLabelText(('|T%s:16|t %s'):format(args.icon, self:GetTitle()))
+        enableCheckBox:SetProfile(tdOption:GetName(), 'minimapButtons', self:GetName())
+        enableCheckBox:Into(0, 0, 0)
+        
+        local groupCheckBox = GUI('CheckBox'):New(widget)
+        groupCheckBox:SetLabelText(L['Packed'])
+        groupCheckBox:SetProfile(tdOption:GetName(), 'minimapGroups', self:GetName())
+        groupCheckBox:SetDepend(enableCheckBox)
+        groupCheckBox:Into(30, 0, 300)
+    end
 end
 
 function Addon:GetMinimap()
     return self.__minimap
 end
 
+function tdOption:OnProfileUpdate()
+    self:GetMinimap():Update()
+    
+    local mt = {__index = function(o, k) o[k] = true return true end}
+    
+    setmetatable(self:GetProfile().minimapButtons, mt)
+    setmetatable(self:GetProfile().minimapGroups, mt)
+    setmetatable(self:GetProfile().minimapAngles, {__index = function(o, k) o[k] = 0 return 0 end})
+end
+
 function tdOption:OnInit()
-    self:InitDB('TDDB_TDCORE', {minimapGroup = true, minimapAngle = -253, minimapOrientation = 'LEFT'})
-    self:RegisterCmd('/taiduo', '/td')
-    self:SetHandle('OnSlashCmd', self.ToggleOption)
-    self:InitOption({
-        type = 'TabWidget',
-        {
-            type = 'Widget', label = L['About'], name = 'AboutWidget',
-        },
-        {
-            type = 'Widget', label = L['Config'],
-            {
-                type = 'CheckBox', label = L['Pack mini map buttons'], name = 'PackMinimapCheckBox',
-                profile = {self:GetName(), 'minimapGroup'}
-            },
-            {
-                type = 'ComboBox', label = L['Mini map orientation'], depend = 'PackMinimapCheckBox',
-                profile = {self:GetName(), 'minimapOrientation'},
-                itemList = {
-                    {text = L['Left'], value = 'LEFT'},
-                    {text = L['Right'], value = 'RIGHT'},
-                    {text = L['Top'], value = 'TOP'},
-                    {text = L['Bottom'], value = 'BOTTOM'},
-                }
-            },
-        },
-    }, L['About'])
+    self:InitDB('TDDB_TDCORE', {
+        minimapOrientation = 'LEFT',
+        minimapButtons = {},
+        minimapGroups = {},
+        minimapAngles = { tdCore = -150, },
+    })
     
     self:InitMinimap({
         itemList = self('Frame'):GetAddonList(),
@@ -63,7 +81,12 @@ function tdOption:OnInit()
         icon = [[Interface\MacroFrame\MacroFrame-Icon]],
         scripts = {
             OnCall = function(self)
-                tdOption:ToggleOption()
+                local menu = tdOption('MinimapMenu')
+                if menu:IsVisible() then
+                    menu:Hide()
+                else
+                    self:ToggleMenu('MinimapMenu')
+                end
             end,
             OnMenu = function(o, option)
                 option:GetAddon():ToggleOption()
@@ -73,9 +96,13 @@ function tdOption:OnInit()
                 self:ToggleMenu('MinimapMenu')
             end,
         }
-    })
+    }, true)
     
-    local widget = self:GetOption():GetFrame():GetControl('AboutWidget')
+    GUI:InitOption({
+        type = 'Widget', label = L['About']
+    }, L['About'])
+    
+    local widget = GUI:GetOption():GetFrame()
     
     local function CreateLabel(text, fontObject, ...)
         local label = widget:CreateFontString(nil, 'OVERLAY', fontObject)
@@ -157,4 +184,34 @@ function tdOption:OnInit()
     CreateEditbox('http://github.com/dengsir',      'TOPLEFT', 192, -250)
     CreateEditbox('http://t.qq.com/taiduo_ldz',     'TOPLEFT', 192, -300)
     CreateEditbox('http://www.weibo.com/tdaddon',   'TOPLEFT', 192, -350)
+    
+    
+    self:InitOption({
+        type = 'TabWidget',
+        {
+            type = 'Widget', label = L['Minimap buttons'],
+            {
+                type = 'ComboBox', label = L['Mini map orientation'],
+                profile = {self:GetName(), 'minimapOrientation'},
+                itemList = {
+                    {text = L['Left'], value = 'LEFT'},
+                    {text = L['Right'], value = 'RIGHT'},
+                    {text = L['Top'], value = 'TOP'},
+                    {text = L['Bottom'], value = 'BOTTOM'},
+                }
+            },
+            {
+                type = 'Widget', label = L['Minimap buttons'], name = 'MinimapGroupWidget',
+                verticalArgs = {-1, -15, 0, 0},
+            }
+        },
+        -- {
+            -- type = 'Widget', label = L['Fonts'],
+        -- },
+    })
+    
+    self:RegisterCmd('/taiduo', '/td')
+    self:SetHandle('OnSlashCmd', self.ToggleOption)
+    self:SetHandle('OnProfileUpdate', self.OnProfileUpdate)
+    self:OnProfileUpdate()
 end

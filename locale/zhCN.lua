@@ -34,9 +34,11 @@ L['Are you sure overwrites the current configuration file to |cffffffff[%s]|r?']
 
 L['About'] = '关于'
 L['Config'] = '设置'
-L['Pack mini map buttons'] = '打包小地图按钮'
 L['Mini map orientation'] = '小地图按钮增长方向'
 L['Left'] = '左'
 L['Right'] = '右'
 L['Top'] = '上'
 L['Bottom'] = '下'
+
+L['Minimap buttons'] = '小地图按钮'
+L['Packed'] = '聚合'

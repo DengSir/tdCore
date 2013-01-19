@@ -7,17 +7,6 @@ local MinimapMenu = tdOption:NewModule('MinimapMenu', GUI('Widget'):New(UIParent
 GUI:NewMenu('MinimapMenu', MinimapMenu, 10, true)
 
 MinimapMenu.buttons = {}
-MinimapMenu:SetSize(32, 32)
-MinimapMenu:SetBackdrop(nil)
-MinimapMenu:SetFrameStrata('HIGH')
-MinimapMenu:HookScript('OnShow', function(self)
-    local orientation = tdOption:GetProfile().minimapOrientation
-    if orientation == 'LEFT' or orientation == 'RIGHT' then
-        self:SetSize((#self.buttons - 1) * 32, 32)
-    else
-        self:SetSize(32, (#self.buttons - 1) * 32)
-    end
-end)
 
 function MinimapMenu:GetPositionArgs()
     local orientation = tdOption:GetProfile().minimapOrientation
@@ -32,56 +21,65 @@ function MinimapMenu:GetPositionArgs()
     end
 end
 
-function MinimapMenu:Add(args, addon)
-    args.type = 'MinimapButton'
-    args.profile = {addon:GetName(), 'minimapAngle'}
-    args.angle = addon:GetProfile() and addon:GetProfile().minimapAngle or args.angle or 0
-    
-    local button = GUI:CreateGUI(args, UIParent, false)
+function MinimapMenu:Add(button)
     tinsert(self.buttons, button)
     
-    self:SetAllowGroup(self:GetAllowGroup())
+    self:Refresh()
     
     return button
 end
 
-function MinimapMenu:SetAllowGroup(allow)
+function MinimapMenu:Refresh()
+    local prev
+    local count = 0
+    local orientation = tdOption:GetProfile().minimapOrientation
+    
     for i, button in ipairs(self.buttons) do
-        if i == 1 then
-            button:SetAllowGroup(false)
-            button:Update()
-        else
+        if self:GetAllowShow(button) then
+            local allow = self:GetAllowGroup(button)
             button:SetAllowGroup(allow)
             if allow then
                 button:SetParent(self)
                 button:ClearAllPoints()
-                if i == 2 then
-                    button:SetPoint('TOPLEFT')
-                else
-                    button:SetPoint('TOPLEFT', self.buttons[i-1], 'TOPRIGHT')
+                
+                local x, y = count * 32, 0
+                if orientation == 'TOP' or orientation == 'BOTTOM' then
+                    x, y = y, -x
                 end
+                button:SetPoint('TOPLEFT', x, y)
+                prev = button
+                count = count + 1
             else
                 button:SetParent(Minimap)
                 button:SetFrameLevel(Minimap:GetFrameLevel() + 10)
                 button:Update()
             end
+            button:Show()
+        else
+            button:Hide()
         end
     end
-end
-
-function MinimapMenu:GetAllowGroup()
-    if tdOption:GetProfile() then
-        return tdOption:GetProfile().minimapGroup
-    else
-        return true
+    
+    local w, h = count * 32, 32
+    if orientation == 'TOP' or orientation == 'BOTTOM' then
+        w, h = h, w
     end
+    self:SetSize(w, h)
 end
 
-function MinimapMenu:OnProfileUpdate()
-    self:SetAllowGroup(self:GetAllowGroup())
+function MinimapMenu:GetAllowGroup(button)
+    return tdOption:GetProfile().minimapGroups[button.__addon:GetName()]
+end
+
+function MinimapMenu:GetAllowShow(button)
+    return tdOption:GetProfile().minimapButtons[button.__addon:GetName()]
 end
 
 function MinimapMenu:OnInit()
-    self:SetAllowGroup(tdOption:GetProfile().minimapGroup)
-    self:SetHandle('OnProfileUpdate', self.OnProfileUpdate)
+    self:SetSize(32, 32)
+    self:SetBackdrop(nil)
+    self:SetFrameStrata('HIGH')
+    self:HookScript('OnShow', self.Refresh)
+    
+    self:SetHandle('OnProfileUpdate', self.Refresh)
 end

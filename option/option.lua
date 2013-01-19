@@ -37,6 +37,10 @@ function Option:GetProfile()
     return self:GetAddon() and self:GetAddon():GetProfile()
 end
 
+function Option:GetControl(name)
+    return self:GetFrame():GetControl(name)
+end
+
 function Option:Show()
     self:GetFrame():Show()
 end
