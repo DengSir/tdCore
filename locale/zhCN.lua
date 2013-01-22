@@ -31,7 +31,7 @@ L['Remove Profile'] = '删除配置文件'
 L['Please choose profile ...'] = '请选择配置文件...'
 L['Are you sure to delete configuration file |cffffffff[%s]|r?'] = '你确定要删除配置文件|cffffffff[%s]|r？'
 L['Are you sure overwrites the current configuration file to |cffffffff[%s]|r?'] = '你确定要用配置文件|cffffffff[%s]|r覆盖到当前配置？'
-
+L['Click and press Ctrl-C to copy'] = '单击并按下 Ctrl-C 复制到剪切板'
 L['About'] = '关于'
 L['Config'] = '设置'
 L['Mini map orientation'] = '小地图按钮增长方向'

@@ -22,34 +22,35 @@ function Addon:GetOption()
     return self.__option
 end
 
-function Addon:InitMinimap(args, isparent)
+function Addon:InitMinimap(args)
     args.type = 'MinimapButton'
+    args.note = args.note or self:GetTitle()
     args.profile = {tdOption:GetName(), 'minimapAngles', self:GetName()}
     
     local button = GUI:CreateGUI(args, Minimap, false)
     button.__addon = self
     self.__minimap = button
     
-    if isparent then
+    if args.notGroup then
         button:SetAllowGroup(false)
         button:SetParent(Minimap)
         button:Update()
     else
         tdOption('MinimapMenu'):Add(button)
-    end
-    
-    local widget = tdOption:GetOption() and tdOption:GetOption():GetControl('MinimapGroupWidget')
-    if widget then
-        local enableCheckBox = GUI('CheckBox'):New(widget)
-        enableCheckBox:SetLabelText(('|T%s:16|t %s'):format(args.icon, self:GetTitle()))
-        enableCheckBox:SetProfile(tdOption:GetName(), 'minimapButtons', self:GetName())
-        enableCheckBox:Into(0, 0, 0)
         
-        local groupCheckBox = GUI('CheckBox'):New(widget)
-        groupCheckBox:SetLabelText(L['Packed'])
-        groupCheckBox:SetProfile(tdOption:GetName(), 'minimapGroups', self:GetName())
-        groupCheckBox:SetDepend(enableCheckBox)
-        groupCheckBox:Into(30, 0, 300)
+        local widget = tdOption:GetOption() and tdOption:GetOption():GetControl('MinimapGroupWidget')
+        if widget then
+            local enableCheckBox = GUI('CheckBox'):New(widget)
+            enableCheckBox:SetLabelText(('|T%s:16|t %s'):format(args.icon, self:GetTitle()))
+            enableCheckBox:SetProfile(tdOption:GetName(), 'minimapButtons', self:GetName())
+            enableCheckBox:Into(0, 0, 0)
+            
+            local groupCheckBox = GUI('CheckBox'):New(widget)
+            groupCheckBox:SetLabelText(L['Packed'])
+            groupCheckBox:SetProfile(tdOption:GetName(), 'minimapGroups', self:GetName())
+            groupCheckBox:SetDepend(enableCheckBox)
+            groupCheckBox:Into(30, 0, 300)
+        end
     end
 end
 
@@ -75,10 +76,11 @@ function tdOption:OnInit()
         minimapAngles = { tdCore = -150, },
     })
     
-    self:InitMinimap({
+    self:InitMinimap{
         itemList = self('Frame'):GetAddonList(),
         note = {L['Taiduo\'s Addons']},
         icon = [[Interface\MacroFrame\MacroFrame-Icon]],
+        notGroup = true,
         scripts = {
             OnCall = function(self)
                 local menu = tdOption('MinimapMenu')
@@ -96,7 +98,7 @@ function tdOption:OnInit()
                 self:ToggleMenu('MinimapMenu')
             end,
         }
-    }, true)
+    }
     
     GUI:InitOption({
         type = 'Widget', label = L['About']
@@ -139,12 +141,16 @@ function tdOption:OnInit()
             insets = {left = 2, right = 2, top = 2, bottom = 2}
         })
         self:SetBackdropColor(0, 0, 0, 0.4)
+        GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
+        GameTooltip:SetText(L['Click and press Ctrl-C to copy'])
+        GameTooltip:Show()
     end
 
     local function OnLeave(self)
         if not self:HasFocus() then
             self:SetBackdrop({})
         end
+        GameTooltip:Hide()
     end
     
     local function CreateEditbox(text, ...)
@@ -211,7 +217,7 @@ function tdOption:OnInit()
     })
     
     self:RegisterCmd('/taiduo', '/td')
-    self:SetHandle('OnSlashCmd', self.ToggleOption)
+    self:SetHandle('OnSlashCmd', function() GUI:ToggleOption() end)
     self:SetHandle('OnProfileUpdate', self.OnProfileUpdate)
     self:OnProfileUpdate()
 end
