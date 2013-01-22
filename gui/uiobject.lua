@@ -195,7 +195,7 @@ end
 
 function UIObject:SetPoints(...)
     for i = 1, select('#', ...) do
-        self:SetPoint(unpack(select(i, ...)))
+        self:SetPoint(unpack((select(i, ...))))
     end
 end
 
