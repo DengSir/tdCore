@@ -10,7 +10,7 @@ function Option:New(gui, addon, title)
     local obj = self:Bind{}
     
     obj.__addon = addon
-    obj.__frame = GUI:CreateGUI(gui)
+    obj.__frame = GUI:CreateGUI(gui, tdOption('Frame'))
     
     tdOption('Frame'):AddOption(obj, title)
     
