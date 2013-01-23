@@ -52,6 +52,10 @@ function Addon:InitMinimap(args)
             groupCheckBox:Into(30, 0, 300)
         end
     end
+    if args.angle then
+        button:SetProfileValue(args.angle)
+        button:SetAngle(args.angle)
+    end
 end
 
 function Addon:GetMinimap()
@@ -80,7 +84,7 @@ function tdOption:OnInit()
         itemList = self('Frame'):GetAddonList(),
         note = {L['Taiduo\'s Addons']},
         icon = [[Interface\MacroFrame\MacroFrame-Icon]],
-        notGroup = true,
+        notGroup = true, angle = -152,
         scripts = {
             OnCall = function(self)
                 local menu = tdOption('MinimapMenu')

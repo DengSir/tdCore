@@ -91,6 +91,10 @@ function MinimapButton:SetIcon(texture)
     self.__icon:SetTexture(texture)
 end
 
+function MinimapButton:SetIconCoord(...)
+    self.__icon:SetTexCoord(...)
+end
+
 function MinimapButton:SetValue(value)
     self:RunHandle('OnMenu', value)
 end

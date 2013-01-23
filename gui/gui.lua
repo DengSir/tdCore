@@ -103,8 +103,9 @@ function GUI:CreateGUI(data, parent, uiparent)
     Set.SetListObject(obj, data.listObject)
     
     -- MinimapButton
-    Set.SetAngle(obj, data.angle)
+    -- Set.SetAngle(obj, data.angle)
     Set.SetIcon(obj, data.icon)
+    Set.SetIconCoord(obj, safeunpack(data.iconCoord))
     
     if type(data.scripts) == 'table' then
         for script, func in pairs(data.scripts) do

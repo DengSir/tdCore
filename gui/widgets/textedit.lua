@@ -21,7 +21,7 @@ end
 
 function EditBox:OnTextChanged()
     if self.readonly then
-        self:SetText(self.text)
+        self:SetText(self.text or '')
     else
         self.handleCursorChange = true
         EditBox.OnUpdate(self, 0)
@@ -174,4 +174,9 @@ end
 
 function TextEdit:Update()
     
+end
+
+function TextEdit:SetText(text)
+    self.__childParent.text = text
+    self.__childParent:SetText(text)
 end
