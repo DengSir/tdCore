@@ -50,9 +50,7 @@ function Addon:GetVersion()
 end
 
 function Addon:Debug(...)
-    if tdCore:GetAllowDebug() then
-        tdCore:Debug(self:GetName(), ...)
-    end
+    tdCore:Debug(self:GetName(), ...)
 end
 
 ------ locale

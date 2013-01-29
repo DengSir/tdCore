@@ -49,7 +49,7 @@ end
 
 function tdCore:Debug(name, ...)
     if self:GetAllowDebug() then
-        tdCore('tdDebug'):Add(name, ...)
+        self('tdDebug'):Add(name, debugstack(3):gsub(': in function.+$', ''), ...)
     end
 end
 

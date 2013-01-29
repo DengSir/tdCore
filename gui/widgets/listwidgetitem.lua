@@ -145,6 +145,7 @@ function ListWidgetLinkItem:SetText(text)
     if text then
         self.__link = link
         self:GetLabelFontString():SetText(text)
+        self:StopUpdate()
     else
         self:GetLabelFontString():SetText('Loading ...')
     end

@@ -15,35 +15,22 @@ local function OnUpdate(self, elapsed)
     end
 end
 
-local function StartUpdate(obj, interval, onUpdate)
-    onUpdate = onUpdate or obj.OnUpdate
-    if onUpdate then
-        obj.__onUpdate = onUpdate
-        obj.__interval = interval or 0
-        obj.__elapsed = 0
-        obj:SetScript('OnUpdate', OnUpdate)
-        obj:Show()
-    end
-end
-
 local Embeds = {
-    BaseEmbed = {
-        GetAddon = function(self)
-            return self.__tdaddon
-        end,
-        Debug = function(self, ...)
-            if tdCore:GetAllowDebug() then
-                self:GetAddon():Debug(self:GetClassName(), ...)
-            end
-        end,
-    },
-    
     Event = function(obj)
         obj:SetScript('OnEvent', tdCore.OnEvent)
     end,
     
     Update = {
-        StartUpdate = StartUpdate,
+        StartUpdate = function(obj, interval, onUpdate)
+            onUpdate = onUpdate or obj.OnUpdate
+            if onUpdate then
+                obj.__onUpdate = onUpdate
+                obj.__interval = interval or 0
+                obj.__elapsed = 0
+                obj:SetScript('OnUpdate', OnUpdate)
+                obj:Show()
+            end
+        end,
         StopUpdate = function(obj)
             obj:SetScript('OnUpdate', nil)
             obj.__onUpdate = nil
@@ -74,10 +61,13 @@ function Addon:NewModule(name, obj, ...)
     assert(type(name) == 'string', 'Bad argument #1 to `NewModule\' (string expected)')
     if not self.__modules[name] then
         obj = tdCore:NewClass(name, type(obj) == 'table' and obj or {})
-        obj.__tdaddon = self
         obj:RegisterHandle('OnProfileUpdate')
+        obj.__debugName = self:GetName()
+        obj.Debug = function(self, ...)
+            tdCore:Debug(self.__debugName, ...)
+        end
         
-        self:Embed(obj, 'BaseEmbed', ...)
+        self:Embed(obj, ...)
         self.__modules[name] = obj
         
         if obj.Hide and type(obj.Hide) == 'function' then obj:Hide() end
