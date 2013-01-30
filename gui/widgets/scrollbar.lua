@@ -101,26 +101,14 @@ end
 
 local orig_ScrollBar_SetMinMaxValues = ScrollBar.SetMinMaxValues
 function ScrollBar:SetMinMaxValues(min, max)
-    if min == max then
-        self:Hide()
-    else
-        self:Show()
-    end
+    self:SetShown(min ~= max)
     orig_ScrollBar_SetMinMaxValues(self, min, max)
     self:UpdateButton(self:GetValue(), min, max)
 end
 
 function ScrollBar:UpdateButton(value, min, max)
-    if value == min then
-        self.up:Disable()
-    else
-        self.up:Enable()
-    end
-    if value == max then
-        self.down:Disable()
-    else
-        self.down:Enable()
-    end
+    self.up:SetEnabled(value ~= min)
+    self.down:SetEnabled(value ~= max)
 end
 
 function ScrollBar:Up(step)

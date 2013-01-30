@@ -116,3 +116,11 @@ function Widget:Disable()
         self:GetLabelFontString():SetStatus('DISABLED')
     end
 end
+
+function Widget:SetEnabled(enableFlag)
+    if enableFlag then
+        self:Enable()
+    else
+        self:Disable()
+    end
+end
