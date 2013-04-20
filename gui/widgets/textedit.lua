@@ -24,7 +24,6 @@ function EditBox:OnTextChanged()
         self:SetText(self.text or '')
     else
         self.handleCursorChange = true
-        EditBox.OnUpdate(self, 0)
     end
 end
 
@@ -77,7 +76,7 @@ TextEdit.__index = function(o, k)
     local editbox = rawget(o, '__childParent')
     if editbox and type(editbox[k]) == 'function' then
         o[k] = function(self, ...)
-            return editbox[k](editbox, ...)
+            return self.__childParent[k](self.__childParent, ...)
         end
         return o[k]
     end
@@ -146,6 +145,7 @@ function TextEdit:New(parent)
     
     obj:SetScript('OnSizeChanged', self.OnSizeChanged)
     obj:SetScript('OnMouseUp', self.OnMouseUp)
+    obj:SetScript('OnVerticalScroll', self.OnVerticalScroll)
     
     return obj
 end
@@ -166,6 +166,10 @@ end
 
 function TextEdit:OnMouseUp()
     self.__childParent:SetFocus()
+end
+
+function TextEdit:OnVerticalScroll(offset)
+    self.__scrollBar:SetValue(offset)
 end
 
 function TextEdit:SetReadOnly(readonly)

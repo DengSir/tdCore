@@ -4,17 +4,7 @@ local tdCore = tdCore
 
 local GUI = tdCore('GUI')
 
-local function copyTable(src)
-    if type(src) ~= 'table' then
-        return src
-    end
-    
-    local dest = {}
-    for k, v in pairs(src) do
-        dest[k] = copyTable(v)
-    end
-    return dest
-end
+local copyTable = tdCore.copyTable
 
 local function mergeTable(dest, src)
     if type(src) ~= 'table' or type(dest) ~= 'table' then
@@ -58,7 +48,11 @@ function Control:GetProfileValue()
     for _, key in ipairs(self.__dbkeys) do
         profile = profile[key]
     end
-    return copyTable(profile)
+    if type(profile) == 'table' then
+        return copyTable({}, profile)
+    else
+        return profile
+    end
 end
 
 function Control:SetProfileValue(value, replace)
@@ -69,7 +63,14 @@ function Control:SetProfileValue(value, replace)
     
     for i, key in ipairs(self.__dbkeys) do
         if i == #self.__dbkeys then
-            profile[key] = replace and copyTable(value) or mergeTable(profile[key], value)
+            if type(value) ~= 'table' then
+                profile[key] = value
+            elseif replace then
+                wipe(profile[key])
+                copyTable(profile[key], value)
+            else
+                mergeTable(profile[key], value)
+            end
         else
             profile = profile[key]
         end

@@ -1,6 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-    <Script file="extra.lua"/>
     <Script file="core.lua"/>
+    <Script file="extra.lua"/>
     <Script file="class.lua"/>
     <Script file="locale.lua"/>
     <Script file="db.lua"/>
@@ -12,5 +12,4 @@
     
     <Include file="gui\gui.xml"/>
     <Include file="option\option.xml"/>
-    <!--Script file="option.lua"/-->
 </Ui>

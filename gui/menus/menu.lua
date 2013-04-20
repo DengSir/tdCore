@@ -130,10 +130,24 @@ function Menu:ToggleMenu(caller, name, ...)
     menu:Toggle(caller, ...)
 end
 
+function Menu:ShowMenu(caller, name, ...)
+    local menu = self:GetMenu(name)
+    if not menu then
+        error('menu error')
+    end
+    
+    menu:Hide()
+    menu:Toggle(caller, ...)
+end
+
 local GUI = tdCore('GUI')
 
-function GUI:ToggleMenu(caller, name, ...)
-    Menu:ToggleMenu(caller, name, ...)
+function GUI:ToggleMenu(...)
+    Menu:ToggleMenu(...)
+end
+
+function GUI:ShowMenu(...)
+    Menu:ShowMenu(...)
 end
 
 function GUI:NewMenu(...)

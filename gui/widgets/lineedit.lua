@@ -79,16 +79,18 @@ local validnumber = {
     ['-0.'] = true,
 }
 function LineEdit:OnTextChanged()
-    if not self:HasFocus() then
-        self:SetCursorPosition(0)
-        self:HighlightText(0, 100)
-    end
-    
     local text = self:GetText()
+    -- if not self:HasFocus() then
+        -- self:SetCursorPosition(0)
+        -- self:HighlightText(0, text:len())
+        -- self:HighlightText(0, 0)
+    -- end
+    
     if self:IsNumeric() and not validnumber[text] then
         local value = tonumber(text)
         if not value then
             self:SetText(self.prevValue)
+            self:SetCursorPosition(self.prevCursorPosition)
             return
         elseif value == 0 then
             self.prevValue = 0
@@ -97,4 +99,5 @@ function LineEdit:OnTextChanged()
         end
     end
     self.prevValue = text
+    self.prevCursorPosition = self:GetCursorPosition()
 end

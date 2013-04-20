@@ -68,7 +68,11 @@ function MinimapMenu:Refresh()
 end
 
 function MinimapMenu:GetAllowGroup(button)
-    return tdOption:GetProfile().minimapGroups[button.__addon:GetName()]
+    if not tdOption:GetProfile().showMinimap then
+        return false
+    else
+        return tdOption:GetProfile().minimapGroups[button.__addon:GetName()]
+    end
 end
 
 function MinimapMenu:GetAllowShow(button)

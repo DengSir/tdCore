@@ -11,9 +11,12 @@ end
 function InputDialog:New(parent)
     local obj = self:Bind(GUI('Dialog'):New(parent))
     if parent then
-        local lineedit = GUI('LineEdit'):New(self)
-        lineedit:SetPoint('BOTTOMLEFT', self.okay, 'TOPLEFT', 5, 0)
-        lineedit:SetPoint('RIGHT', -10, 0)
+        local lineedit = GUI('LineEdit'):New(obj)
+        lineedit:SetPoint('BOTTOMLEFT', obj.accept, 'TOPLEFT', 0, 5)
+        lineedit:SetPoint('RIGHT', -64, 0)
+        lineedit:Show()
+        
+        obj.lineedit = lineedit
     end
     return obj
 end

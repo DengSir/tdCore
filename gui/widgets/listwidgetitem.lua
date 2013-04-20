@@ -32,9 +32,10 @@ function ListWidgetItem:New(parent)
     
     if GUI:IsWidgetType(parent, 'ListWidget') then
         obj:GetLabelFontString():SetPoint('LEFT', 5, 0)
+        obj:GetLabelFontString():SetPoint('RIGHT', -5, 0)
         obj:SetFontString(obj:GetLabelFontString())
-        obj:SetNormalFontObject('GameFontNormalSmall')
-        obj:SetHighlightFontObject('GameFontHighlightSmall')
+        obj:SetNormalFontObject('GameFontNormalSmallLeft')
+        obj:SetHighlightFontObject('GameFontHighlightSmallLeft')
         
         obj:SetHighlightTexture([[Interface\QuestFrame\UI-QuestLogTitleHighlight]])
         obj:SetCheckedTexture([[Interface\QuestFrame\UI-QuestLogTitleHighlight]])

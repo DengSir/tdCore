@@ -6,7 +6,9 @@ local LIST_SPACING = 5
 local EXTRA_BUTTON_SIZE = 24
 
 local ListWidget = GUI:NewModule('ListWidget', CreateFrame('Frame'), 'UIObject', 'View', 'Control', 'Update')
-ListWidget:RegisterHandle('OnItemClick', 'OnAdd', 'OnDelete', 'OnSelectAll', 'OnSelectNone', 'OnCustom1', 'OnCustom2', 'OnCustom3')
+ListWidget:RegisterHandle('OnAdd', 'OnDelete', 'OnSelectAll', 'OnSelectNone')
+ListWidget:RegisterHandle('OnCustom1', 'OnCustom2', 'OnCustom3')
+ListWidget:RegisterHandle('OnItemClick', 'OnItemSelect')
 
 function ListWidget:GetWheelStep()
     return self:GetMaxCount() - 1
@@ -46,7 +48,21 @@ end
 
 ---- scripts
 
+function ListWidget:GetSelectedCount()
+    local count = 0
+    for i = 1, self:GetItemCount() do
+        if self:GetSelected(i) then
+            count = count + 1
+        end
+    end
+    return count
+end
+
 function ListWidget:OnDelete()
+    if self:GetSelectedCount() <= 0 then
+        return
+    end
+    
     self:ShowDialog(
         'Dialog',
         L['Are you sure to delete the selected item?'],
@@ -106,6 +122,7 @@ local SELECTMODES = setmetatable({
             
             self.__selected = index
             self:Refresh()
+            self:RunHandle('OnItemSelect', index)
         end,
         SelectAll = DoNothing,
         
@@ -121,11 +138,13 @@ local SELECTMODES = setmetatable({
             
             self.__selected[index] = checked or nil
             self:Refresh()
+            self:RunHandle('OnItemSelect', index)
         end,
         SelectAll = function(self, enable)
             if enable then
                 for i = 1, self:GetItemCount() do
                     self.__selected[i] = true
+                    self:RunHandle('OnItemSelect', i)
                 end
             else
                 wipe(self.__selected)

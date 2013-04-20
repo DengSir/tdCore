@@ -112,7 +112,7 @@ function GUI:CreateGUI(data, parent, uiparent)
             if obj:HasScript(script) then
                 obj:HookScript(script, func)
             elseif obj:HasHandle(script) then
-                obj:SetHandle(script, func)
+                obj:HookHandle(script, func)
             end
         end
     end

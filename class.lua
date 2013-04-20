@@ -5,6 +5,7 @@ local format = string.format
 local tdCore = tdCore
 
 local handles = {}
+local hookedHandles = {}
 
 local function Debug(self, ...)
     if tdCore:GetAllowDebug() then
@@ -33,7 +34,9 @@ local function RegisterHandle(self, ...)
         
         assert(type(name) == 'string', format('Bad argument #%d to `RegisterHandle\' (string expected)', i))
         
-        self.__handles = self.__handles or {}
+        if not rawget(self, '__handles') then
+            self.__handles = tdCore.copyTable({}, self.__handles)
+        end
         self.__handles[name] = true
     end
 end
@@ -57,6 +60,20 @@ local function SetHandle(self, name, method)
     
     handles[self] = handles[self] or {}
     handles[self][name] = method
+    
+    hookedHandles[self] = hookedHandles[self] or {}
+    hookedHandles[self][name] = {}
+end
+
+local function HookHandle(self, name, method)
+    assert(type(name) == 'string', 'Bad argument #1 to `SetHandle\' (string expected)')
+    assert(type(method) == 'function' or method == nil, 'Bad argument #3 `SetHandle\' (function or nil expected)')
+    assert(HasHandle(self, name), format('Bad argument #2 to `SetHandle\' (not has this handle [ %s ] )', name))
+    
+    hookedHandles[self] = hookedHandles[self] or {}
+    hookedHandles[self][name] = hookedHandles[self][name] or {}
+    
+    tinsert(hookedHandles[self][name], method)
 end
 
 local function RunHandle(self, name, ...)
@@ -65,6 +82,11 @@ local function RunHandle(self, name, ...)
     local method = GetHandle(self, name)
     if method then
         method(self, ...)
+    end
+    if hookedHandles[self] and hookedHandles[self][name] then
+        for i, method in ipairs(hookedHandles[self][name]) do
+            method(self, ...)
+        end
     end
 end
 
@@ -80,6 +102,7 @@ function tdCore:NewClass(name, obj)
     obj.GetHandle = GetHandle
     obj.SetHandle = SetHandle
     obj.RunHandle = RunHandle
+    obj.HookHandle = HookHandle
     obj.RegisterHandle = RegisterHandle
     
     obj.GetClassName = GetClassName

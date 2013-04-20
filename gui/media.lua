@@ -15,6 +15,36 @@ function Media:GetBars()
     return self.Bars
 end
 
+function Media:CheckFontPath(path)
+    if not self.testFont then
+        self.testFont = UIParent:CreateFontString()
+    end
+    if self.testFont:SetFont(path, 12) then
+        return path:lower()
+    end
+end
+
+function Media:FindFont(path)
+    for i, v in ipairs(self.Fonts) do
+        if v == path then
+            return i
+        end
+    end
+end
+
+function Media:DeleteFont(path)
+    local i = self:FindFont(path)
+    tremove(self.Fonts, i)
+end
+
+function Media:AddFont(path)
+    path = self:CheckFontPath(path)
+    if path and not self:FindFont(path) then
+        tinsert(self.Fonts, path)
+        return path
+    end
+end
+
 do
     local fonts = {
         [[fonts\arkai_t.ttf]],
@@ -34,27 +64,11 @@ do
         [[fonts\nim_____.ttf]],
         [[fonts\skurri.ttf]],
     }
-    local testFont = UIParent:CreateFontString(nil, 'OVERLAY')
     
-    for _, font in ipairs(fonts) do
-        if testFont:SetFont(font, 12) then
-            tinsert(Media.Fonts, font)
+    for _, v in ipairs(fonts) do
+        local path = Media:CheckFontPath(v)
+        if path then
+            tinsert(Media.Fonts, path)
         end
     end
-    
-    --[=[
-    local name = ...
-    local fontpath = [[Interface\AddOns\]] .. name .. [[\media\fonts\font%d.ttf]]
-    
-    local i = 1
-    while true do
-        local font = fontpath:format(i)
-        if testFont:SetFont(font, 12) then
-            tinsert(Media.Fonts, font)
-        else
-            break
-        end
-        i = i + 1
-    end
-    --]=]
 end

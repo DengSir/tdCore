@@ -4,14 +4,10 @@ local assert, pairs, select, type = assert, pairs, select, type
 local Addon = tdCore.Addon
 
 local function OnUpdate(self, elapsed)
-    if self.__interval == 0 then
-        self:__onUpdate(elapsed)
-    else
-        self.__elapsed = self.__elapsed + elapsed
-        if self.__elapsed >= self.__interval then
-            self:__onUpdate(self.__elapsed)
-            self.__elapsed = 0
-        end
+    self.__elapsed = self.__elapsed + elapsed
+    if self.__elapsed >= self.__interval then
+        self:__onUpdate(self.__elapsed)
+        self.__elapsed = 0
     end
 end
 
@@ -23,13 +19,21 @@ local Embeds = {
     Update = {
         StartUpdate = function(obj, interval, onUpdate)
             onUpdate = onUpdate or obj.OnUpdate
-            if onUpdate then
-                obj.__onUpdate = onUpdate
+            
+            if not onUpdate then return end
+            
+            if not interval or interval == 0 then
+                obj.__interval = nil
+                obj.__elapsed = nil
+                obj.__onUpdate = nil
+                obj:SetScript('OnUpdate', onUpdate or obj.OnUpdate)
+            else
                 obj.__interval = interval or 0
                 obj.__elapsed = 0
+                obj.__onUpdate = onUpdate
                 obj:SetScript('OnUpdate', OnUpdate)
-                obj:Show()
             end
+            obj:Show()
         end,
         StopUpdate = function(obj)
             obj:SetScript('OnUpdate', nil)

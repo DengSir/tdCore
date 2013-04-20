@@ -8,16 +8,7 @@ local DB = tdCore:NewLibrary('DB', tdCore.DB, 1)
 
 local PROFILE_KEY = format('%s - %s', UnitName('player'), GetRealmName())
 
-local function copyTable(tbl, defaults)
-    for k, v in pairs(defaults) do
-        if type(v) == 'table' then
-            tbl[k] = copyTable(tbl[k] or {}, v)
-        elseif tbl[k] == nil then
-            tbl[k] = v
-        end
-    end
-    return tbl
-end
+local copyTable = tdCore.copyTable
 
 local function removeTable(tbl, defaults)
     for k, v in pairs(defaults) do

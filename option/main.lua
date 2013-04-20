@@ -63,22 +63,39 @@ function Addon:GetMinimap()
 end
 
 function tdOption:OnProfileUpdate()
+    self:GetMinimap():SetShown(self:GetProfile().showMinimap)
     self:GetMinimap():Update()
-    
-    local mt = {__index = function(o, k) o[k] = true return true end}
-    
-    setmetatable(self:GetProfile().minimapButtons, mt)
-    setmetatable(self:GetProfile().minimapGroups, mt)
-    setmetatable(self:GetProfile().minimapAngles, {__index = function(o, k) o[k] = 0 return 0 end})
+end
+
+local function OnAdd(self)
+    self:ShowDialog(
+        'InputDialog',
+        L['Please input font path:'],
+        function(dlg, path)
+            path = GUI('Media'):AddFont(path)
+            if not path then
+                self:ShowDialog('Dialog', L['Font file not exist, or Font already in list.'])
+            else
+                tinsert(tdOption:GetProfile().customFonts, path)
+            end
+        end
+    )
 end
 
 function tdOption:OnInit()
     self:InitDB('TDDB_TDCORE', {
+        showMinimap = true,
         minimapOrientation = 'LEFT',
         minimapButtons = {},
         minimapGroups = {},
         minimapAngles = { tdCore = -150, },
+        customFonts = GUI('Media'):GetFonts(),
     })
+    
+    local mt = {__index = function(o, k) o[k] = true return true end}
+    setmetatable(self:GetProfile().minimapButtons, mt)
+    setmetatable(self:GetProfile().minimapGroups, mt)
+    setmetatable(self:GetProfile().minimapAngles, {__index = function(o, k) o[k] = 0 return 0 end})
     
     self:InitMinimap{
         itemList = self('Frame'):GetAddonList(),
@@ -87,19 +104,13 @@ function tdOption:OnInit()
         notGroup = true, angle = -152,
         scripts = {
             OnCall = function(self)
-                local menu = tdOption('MinimapMenu')
-                if menu:IsVisible() then
-                    menu:Hide()
-                else
-                    self:ToggleMenu('MinimapMenu')
-                end
+                self:ToggleMenu('MinimapMenu')
             end,
             OnMenu = function(o, option)
                 option:GetAddon():ToggleOption()
             end,
             OnEnter = function(self)
-                tdOption('MinimapMenu'):Hide()
-                self:ToggleMenu('MinimapMenu')
+                self:ShowMenu('MinimapMenu')
             end,
         }
     }
@@ -201,7 +212,11 @@ function tdOption:OnInit()
         {
             type = 'Widget', label = L['Minimap buttons'],
             {
-                type = 'ComboBox', label = L['Mini map orientation'],
+                type = 'CheckBox', label = L['Show minimap button'], name = 'CheckBoxShowMinimap',
+                profile = {self:GetName(), 'showMinimap'},
+            },
+            {
+                type = 'ComboBox', label = L['Mini map orientation'], depend = 'CheckBoxShowMinimap',
                 profile = {self:GetName(), 'minimapOrientation'},
                 itemList = {
                     {text = L['Left'], value = 'LEFT'},
@@ -215,9 +230,14 @@ function tdOption:OnInit()
                 verticalArgs = {-1, -15, 0, 0},
             }
         },
-        -- {
-            -- type = 'Widget', label = L['Fonts'],
-        -- },
+        {
+            type = 'ListWidget', label = L['Custom Fonts'],
+            profile = {self:GetName(), 'customFonts'},
+            extraButtons = {GUI.ListButton.Add, GUI.ListButton.Delete, GUI.ListButton.SelectAll, GUI.ListButton.SelectNone},
+            scripts = {
+                OnAdd = OnAdd,
+            },
+        },
     })
     
     self:RegisterCmd('/taiduo', '/td')
