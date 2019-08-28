@@ -6,7 +6,7 @@ MainFrame:SetPadding(20, -50, -20, 20)
 
 function MainFrame:New()
     local obj = self:Bind(CreateFrame('Frame', nil, UIParent))
-    
+
     obj:SetBackdrop{
         bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]],
         edgeFile = [[Interface\DialogFrame\UI-DialogBox-Border]],
@@ -19,14 +19,14 @@ function MainFrame:New()
     obj:SetToplevel(true)
     obj:Hide()
     obj:SetPoint('CENTER')
-    
+
     local titletex = obj:CreateTexture(nil, 'ARTWORK')
     titletex:SetTexture([[Interface\DialogFrame\UI-DialogBox-Header]])
     titletex:SetSize(320, 64)
     titletex:SetPoint('TOP', 0, 12)
-    
+
     obj:GetLabelFontString():SetPoint('TOP')
-    
+
     obj:SetMovable(true)
     obj:EnableMouse(true)
     obj:RegisterForDrag('LeftButton')
@@ -34,10 +34,10 @@ function MainFrame:New()
     obj:SetScript('OnHide', self.OnHide)
     obj:SetScript('OnDragStart', self.StartMoving)
     obj:SetScript('OnDragStop', self.StopMovingOrSizing)
-    
+
     obj.__children = {}
     obj.__childOffset = 0
-    
+
     return obj
 end
 
@@ -47,7 +47,7 @@ function MainFrame:SetAllowEscape(enable)
 end
 
 function MainFrame:OnHide()
-    PlaySound("gsTitleOptionExit")
+    -- PlaySound("gsTitleOptionExit")
     for frame in pairs(frames) do
         if frame:IsShown() then
             return
@@ -58,7 +58,7 @@ function MainFrame:OnHide()
 end
 
 function MainFrame:OnShow()
-    PlaySound('igMainMenuOption')
+    -- PlaySound('igMainMenuOption')
     if frames[self] then
         MainFrame:Show()
     end

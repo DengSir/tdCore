@@ -4,7 +4,7 @@ local menus = {}
 
 function Menu:New(name, obj, holdTime, silent)
     assert(type(name) == 'string')
-    
+
     obj.Toggle = self.Toggle
     obj.GetCaller = self.GetCaller
     obj.SetCaller = self.SetCaller
@@ -14,33 +14,33 @@ function Menu:New(name, obj, holdTime, silent)
     obj.GetPositionArgs = self.GetPositionArgs
     obj.SetSilent = self.SetSilent
     obj.GetSilent = self.GetSilent
-    
+
     obj:Hide()
     obj:SetSilent(silent)
     obj:SetHoldTime(holdTime)
     obj:HookScript('OnShow', self.OnShow)
     obj:HookScript('OnHide', self.OnHide)
     obj:HookScript('OnUpdate', self.OnUpdate)
-    
+
     obj:SetFrameStrata('DIALOG')
     obj:SetBackdropColor(0, 0, 0, 0.9)
     obj:SetClampedToScreen(true)
-    
+
     menus[name] = obj
-    
+
     return obj
 end
 
 function Menu:OnShow()
     if not self:GetSilent() then
-        PlaySound('igMainMenuOpen')
+        -- PlaySound('igMainMenuOpen')
     end
     self.__hideTimer = self:GetHoldTime()
 end
 
 function Menu:OnHide()
     if not self:GetSilent() then
-        PlaySound('igMainMenuClose')
+        -- PlaySound('igMainMenuClose')
     end
     self:SetCaller(nil)
     self.__hideTimer = self:GetHoldTime()
@@ -52,12 +52,12 @@ function Menu:OnUpdate(elapsed)
         self:Hide()
         return
     end
-    
+
     if self:IsMouseOver() then
         self.__hideTimer = self:GetHoldTime()
         return
     end
-    
+
     self.__hideTimer = (self.__hideTimer or self:GetHoldTime()) - elapsed
     if self.__hideTimer < 0 then
         self:Hide()
@@ -117,7 +117,7 @@ end
 
 function Menu:GetMenu(name)
     assert(type(name) == 'string')
-    
+
     return menus[name]
 end
 
@@ -126,7 +126,7 @@ function Menu:ToggleMenu(caller, name, ...)
     if not menu then
         error('menu error')
     end
-    
+
     menu:Toggle(caller, ...)
 end
 
@@ -135,7 +135,7 @@ function Menu:ShowMenu(caller, name, ...)
     if not menu then
         error('menu error')
     end
-    
+
     menu:Hide()
     menu:Toggle(caller, ...)
 end

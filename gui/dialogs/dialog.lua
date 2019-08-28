@@ -18,7 +18,7 @@ local dialogs = {}
 
 function Dialog:New(parent)
     local obj = self:Bind(CreateFrame('Frame', nil, parent))
-    
+
     if parent then
         local label = obj:GetLabelFontString()
         label:ClearAllPoints()
@@ -27,28 +27,28 @@ function Dialog:New(parent)
         label:SetJustifyH('LEFT')
         label:SetJustifyV('TOP')
         label:SetHeight(100)
-        
+
         local icon = obj:CreateTexture(nil, 'OVERLAY')
         icon:SetPoint('RIGHT', 0, 0)
-        
+
         local accept = GUI('Button'):New(obj)
         accept:SetText(OKAY)
         accept:SetPoint('BOTTOMLEFT', DIALOG_PADDING, DIALOG_PADDING)
         accept:SetSize(BUTTON_WIDTH, BUTTON_HEIGHT)
         accept:SetScript('OnClick', DialogButtonOnClick)
         accept.handle = 'OnAccept'
-        
+
         local cancel = GUI('Button'):New(obj)
         cancel:SetText(CANCEL)
         cancel:SetPoint('LEFT', accept, 'RIGHT', 5, 0)
         cancel:SetSize(BUTTON_WIDTH, BUTTON_HEIGHT)
         cancel:SetScript('OnClick', DialogButtonOnClick)
         cancel.handle = 'OnCancel'
-        
+
         obj.icon = icon
         obj.accept = accept
         obj.cancel = cancel
-        
+
         obj:SetBackdrop{
             bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
             edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
@@ -57,16 +57,16 @@ function Dialog:New(parent)
         }
         obj:SetBackdropColor(0, 0, 0, 0.8)
         obj:SetBackdropBorderColor(1, 1, 1, 1)
-        
+
         obj:Hide()
         obj:SetWidth(300)
         obj:SetFrameStrata('DIALOG')
         obj:SetScript('OnShow', self.OnShow)
         obj:SetScript('OnHide', self.OnHide)
-        
+
         tinsert(dialogs, obj)
     end
-    
+
     return obj
 end
 
@@ -86,7 +86,7 @@ function Dialog:RefreshAll()
 end
 
 function Dialog:OnHide()
-    PlaySound("igMainMenuClose")
+    -- PlaySound("igMainMenuClose")
     self:RunHandle(self:GetResultHandle(), self:GetResultValue())
     self:SetHandle('OnAccept', nil)
     self:SetHandle('OnCancel', nil)
@@ -95,14 +95,14 @@ function Dialog:OnHide()
 end
 
 function Dialog:OnShow()
-    PlaySound("igMainMenuOpen")
+    -- PlaySound("igMainMenuOpen")
     self:SetHeight(self:GetShowHeight())
     self:RefreshAll()
 end
 
 function Dialog:GetShowHeight()
     local label = self:GetLabelFontString()
-    
+
     return ceil(label:GetStringWidth() / (self:GetWidth() - DIALOG_PADDING * 2 - ICON_SIZE) + 0.5) *
             label:GetStringHeight() + DIALOG_PADDING * 2 + BUTTON_HEIGHT
 end
@@ -149,16 +149,16 @@ function Dialog:ShowDialog(text, ...)
     if type(icon) == 'function' then
         icon, OnAccept, OnCancel = nil, ...
     end
-    
+
     local dlg = self:GetIdleDialog()
-    
+
     dlg:SetLabelText(text)
     dlg:SetIcon(icon)
     dlg:SetButton(not OnAccept and not OnCancel)
     dlg:SetHandle('OnAccept', OnAccept)
     dlg:SetHandle('OnCancel', OnCancel)
     dlg:Show()
-    
+
     return dlg
 end
 
@@ -185,7 +185,7 @@ function GUI:ShowDialog(caller, name, text, ...)
     if Dialog:GetDialog(name, caller) then
         return
     end
-    
+
     local class = Dialog:GetDialogClass(name)
     if class then
         class:ShowDialog(text, ...):SetCaller(caller)

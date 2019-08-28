@@ -6,30 +6,30 @@ CheckBox:SetVerticalArgs(40, 0, 0)
 
 function CheckBox:New(parent)
     local obj = self:Bind(CreateFrame('CheckButton', nil, parent))
-    
+
     obj.__depends = {}
     obj:SetSize(26, 26)
     obj:SetHitRectInsets(0, -100, 0, 0)
-    
+
     obj:SetNormalTexture([[Interface\Buttons\UI-CheckBox-Up]])
     obj:SetPushedTexture([[Interface\Buttons\UI-CheckBox-Down]])
     obj:SetHighlightTexture([[Interface\Buttons\UI-CheckBox-Highlight]])
     obj:SetCheckedTexture([[Interface\Buttons\UI-CheckBox-Check]])
     obj:SetDisabledCheckedTexture([[Interface\Buttons\UI-CheckBox-Check-Disabled]])
-    
+
     obj:GetLabelFontString():SetPoint('LEFT', obj, 'RIGHT', 5, 0)
     obj:SetFontString(obj:GetLabelFontString())
     obj:SetNormalFontObject('GameFontNormalSmall')
     obj:SetHighlightFontObject('GameFontHighlightSmall')
     obj:SetDisabledFontObject('GameFontDisableSmall')
-    
+
     obj:SetScript('OnClick', self.OnClick)
-    
+
     return obj
 end
 
 function CheckBox:OnClick()
-    PlaySound(self:GetChecked() and 'igMainMenuOptionCheckBoxOff' or 'igMainMenuOptionCheckBoxOn')
+    -- PlaySound(self:GetChecked() and 'igMainMenuOptionCheckBoxOff' or 'igMainMenuOptionCheckBoxOn')
     self:SetProfileValue(self:GetChecked() and true or false)
     self:UpdateDepends()
 end

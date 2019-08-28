@@ -4,7 +4,7 @@ local GUI = tdCore('GUI')
 local ScrollBar = GUI:NewModule('ScrollBar', CreateFrame('Slider'))
 
 local function PageOnClick(self)
-    PlaySound("UChatScrollButton")
+    -- PlaySound("UChatScrollButton")
     local parent = self:GetParent()
     parent:SetValue(parent:GetValue() + self.y)
 end
@@ -19,7 +19,7 @@ function ScrollBar:New(parent)
     obj:SetScript('OnValueChanged', self.OnValueChanged)
     obj:SetScript('OnShow', self.OnShow)
     obj:SetScript('OnHide', self.OnHide)
-    
+
     local up = CreateFrame('Button', nil, obj)
     up:SetPoint('BOTTOM', obj, 'TOP')
     up:SetSize(16, 16)
@@ -33,7 +33,7 @@ function ScrollBar:New(parent)
     up:GetDisabledTexture():SetTexCoord(1/4, 3/4, 1/4, 3/4)
     up:GetHighlightTexture():SetTexCoord(1/4, 3/4, 1/4, 3/4)
     up:GetHighlightTexture():SetBlendMode('ADD')
-    
+
     up.y = -1
     up:SetScript('OnClick', PageOnClick)
 
@@ -50,10 +50,10 @@ function ScrollBar:New(parent)
     down:GetDisabledTexture():SetTexCoord(1/4, 3/4, 1/4, 3/4)
     down:GetHighlightTexture():SetTexCoord(1/4, 3/4, 1/4, 3/4)
     down:GetHighlightTexture():SetBlendMode('ADD')
-    
+
     down.y = 1
     down:SetScript('OnClick', PageOnClick)
-    
+
     local thumb = obj:GetThumbTexture()
     thumb:SetSize(16, 24)
     thumb:SetTexCoord(1/4, 3/4, 1/8, 7/8)
@@ -69,16 +69,16 @@ function ScrollBar:New(parent)
         insets = { left = 0, right = 0, top = 5, bottom = 5 }
     }
     border:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b, 0.5)
-    
+
     obj.up = up
     obj.down = down
-    
+
     return obj
 end
 
 function ScrollBar:OnValueChanged(value)
     self:UpdateButton(value, self:GetMinMaxValues())
-    
+
     local parent = self:GetParent()
     if parent and type(parent.OnScrollValueChanged) == 'function' then
         parent:OnScrollValueChanged(value)

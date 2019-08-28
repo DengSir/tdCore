@@ -6,13 +6,13 @@ local ListWidgetItem = GUI:NewModule('ListWidgetItem', CreateFrame('CheckButton'
 ListWidgetItem:RegisterHandle('OnSetValue')
 
 local function OnClick(self, button)
-    PlaySound('igMainMenuOptionCheckBoxOn')
+    -- PlaySound('igMainMenuOptionCheckBoxOn')
     if type(self.__onClick) == 'function' then
         self:__onClick()
     end
-    
+
     self:SetChecked(false)
-    
+
     local parent = self:GetParent()
     parent:RunHandle('OnItemClick', self:GetIndex())
     parent:SetSelected(self:GetIndex(), not parent:GetSelected(self:GetIndex()))
@@ -29,26 +29,26 @@ end
 function ListWidgetItem:New(parent)
     local obj = self:Bind(CreateFrame('CheckButton', nil, parent))
     obj:Hide()
-    
+
     if GUI:IsWidgetType(parent, 'ListWidget') then
         obj:GetLabelFontString():SetPoint('LEFT', 5, 0)
         obj:GetLabelFontString():SetPoint('RIGHT', -5, 0)
         obj:SetFontString(obj:GetLabelFontString())
         obj:SetNormalFontObject('GameFontNormalSmallLeft')
         obj:SetHighlightFontObject('GameFontHighlightSmallLeft')
-        
+
         obj:SetHighlightTexture([[Interface\QuestFrame\UI-QuestLogTitleHighlight]])
         obj:SetCheckedTexture([[Interface\QuestFrame\UI-QuestLogTitleHighlight]])
-        
+
         obj:GetHighlightTexture():SetVertexColor(0.196, 0.388, 0.8)
         obj:GetCheckedTexture():SetVertexColor(0.82, 0.5, 0)
-        
+
         obj:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
         obj:SetScript('OnClick', OnClick)
-        
+
         if parent:GetAllowOrder() then
             obj:RegisterForDrag('LeftButton')
-            
+
             obj:SetScript('OnDragStart', OnDragStart)
             obj:SetScript('OnDragStop', OnDragStop)
         end
@@ -115,14 +115,14 @@ function ListWidgetLinkItem:GetInfo(text)
     elseif type(text) == 'string' then
         linkType, id = text:match('^(.+):(%d+)$')
     end
-    
+
     if linkType == 'item' then
         local name, link, quality, _, _, _, _, _, _, icon = GetItemInfo(id)
         if not name or not icon or not quality then
             self:StartUpdate(0.2)
             return
         end
-        
+
         local r, g, b = GetItemQualityColor(quality)
         return ('|T%s:16|t |cff%02x%02x%02x%s|r'):format(icon, (r or 1) * 0xff, (g or 1) * 0xff, (b or 1) * 0xff, name), link
     elseif linkType == 'spell' then
@@ -141,7 +141,7 @@ end
 
 function ListWidgetLinkItem:SetText(text)
     self.__text = text
-    
+
     local text, link = self:GetInfo(text)
     if text then
         self.__link = link
